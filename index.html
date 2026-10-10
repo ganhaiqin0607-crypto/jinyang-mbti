@@ -42,6 +42,8 @@ body{background:#f6f9ff;color:#222;min-height:100vh;overflow-x:hidden}
 .btn-money:hover{background:#d1a338}
 .btn-share{background:#44b888;color:#fff}
 .btn-share:hover{background:#34a274}
+.btn-reset{width:100%;margin-top:16px;padding:14px;border-radius:8px;border:none;font-size:16px;cursor:pointer;background:#868fc0;color:#fff}
+.btn-reset:hover{background:#6e78a8}
 .tip-text-result{margin:16px 0;color:#666;font-size:15px}
 #radarBox{width:100%;height:360px;margin:20px 0}
 
@@ -56,12 +58,12 @@ body{background:#f6f9ff;color:#222;min-height:100vh;overflow-x:hidden}
 /* 悄悄话弹窗 */
 .modal{display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.7);z-index:101;align-items:center;justify-content:center;padding:20px}
 .modal-content{background:#fff;padding:24px;border-radius:12px;width:100%;max-width:480px}
+.modal h3{margin-bottom:10px}
 .modal textarea{width:100%;min-height:120px;margin:14px 0;padding:12px;border-radius:8px;background:#f6f9ff;color:#222;border:1px solid #d6e1f0;font-size:16px;resize:vertical}
 .modal-btn-group{display:flex;gap:10px;justify-content:flex-end}
 .modal-btn{padding:10px 16px;border-radius:8px;border:none;cursor:pointer;font-size:15px}
 .send{background:#739bd8;color:white}
 .close{background:#b9c5d6;color:#222}
-.modal-tip{margin-top:10px;color:#666;font-size:14px}
 
 /* 分享卡片弹窗 */
 .shareModal{display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.75);z-index:102;align-items:center;justify-content:center;padding:16px}
@@ -83,13 +85,13 @@ body{background:#f6f9ff;color:#222;min-height:100vh;overflow-x:hidden}
 <div class="container">
     <!-- 欢迎首页 -->
     <div class="welcome-box" id="welcome">
-        <h1>✨这份MBTI测试，专门给金阳同学定制的！</h1>
+        <h1>✨这份MBTI测试，专门给金阳定制！</h1>
         <p>欢迎来到专属人格小测试 🥳<br>请先告诉我：你是金阳本人吗？</p>
         <div class="welcome-btn-group">
             <button class="welcome-btn btn-yes" onclick="setIdentity(true)">✅ 我就是金阳</button>
             <button class="welcome-btn btn-no" onclick="setIdentity(false)">🔘 我不是金阳</button>
         </div>
-        <p class="welcome-tip">本次测试一共48道小题，几分钟就能完成</p>
+        <p class="welcome-tip">本次测试一共48道小题，几分钟完成</p>
     </div>
 
     <!-- 答题区域 -->
@@ -114,6 +116,7 @@ body{background:#f6f9ff;color:#222;min-height:100vh;overflow-x:hidden}
             <button class="action-btn btn-money" id="moneyBtn">💰 给开发者100万现金</button>
             <button class="action-btn btn-share" id="shareBtn">📸 生成分享图</button>
         </div>
+        <button class="btn-reset" id="restartBtn">🔄 重新测试</button>
     </div>
 </div>
 
@@ -121,11 +124,10 @@ body{background:#f6f9ff;color:#222;min-height:100vh;overflow-x:hidden}
 <div class="modal" id="msgModal">
     <div class="modal-content">
         <h3>给开发者留言</h3>
-        <textarea id="msgInput" placeholder="写下你的悄悄话..."></textarea>
-        <p class="modal-tip">⚠ 静态网页，点击发送会复制文字，手动发送</p>
+        <textarea id="msgInput" placeholder="写下你的悄悄话...">开发者辛苦啦，这个测试很有意思！</textarea>
         <div class="modal-btn-group">
             <button class="modal-btn close" onclick="closeMsgModal()">取消</button>
-            <button class="modal-btn send" onclick="copyMsg()">复制留言</button>
+            <button class="modal-btn send" onclick="sendMsg()">发送</button>
         </div>
     </div>
 </div>
@@ -161,53 +163,53 @@ let radarChart=null;
 let cardChart=null;
 // 完整48题
 const questions = [
-    {q:"聚会之后，你需要独处来恢复精力",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["I","E"]},
-    {q:"你更关注事实细节，而不是想象可能性",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["S","N"]},
-    {q:"做决定时，你优先考虑逻辑公平",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["T","F"]},
-    {q:"你喜欢提前规划好日程，不喜欢临时变动",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["J","P"]},
-    {q:"认识新朋友会让你感到精力充沛",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["E","I"]},
-    {q:"你喜欢构思新想法，而不是重复做熟悉的事",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["N","S"]},
-    {q:"做选择时，你更看重人的感受和关系",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["F","T"]},
-    {q:"你习惯随性安排，留有余地不把计划定死",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["P","J"]},
-    {q:"你乐于在很多人的场合主动表达观点",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["E","I"]},
-    {q:"看说明时，你更在意实际操作步骤",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["S","N"]},
-    {q:"争论时，你更容易被道理说服，而非情绪",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["T","F"]},
-    {q:"任务最好有明确截止时间，不能无限拖延",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["J","P"]},
-    {q:"长时间独自做事会让你感到孤单",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["E","I"]},
-    {q:"你经常脑补事情背后隐藏的含义",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["N","S"]},
-    {q:"评价一件事，你首先考虑会不会伤害他人",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["F","T"]},
-    {q:"突发变动，不会让你觉得烦躁不安",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["P","J"]},
-    {q:"你倾向先开口交流，而不是默默观察",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["E","I"]},
-    {q:"你更相信亲身经历，不喜欢抽象理论",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["S","N"]},
-    {q:"你很难硬起心肠拒绝身边人的请求",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["F","T"]},
+    {q:"聚会结束之后，你需要独处恢复精力",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["I","E"]},
+    {q:"你更看重事实细节，而不是想象各种可能性",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["S","N"]},
+    {q:"做决定，优先看逻辑公平",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["T","F"]},
+    {q:"你喜欢提前规划日程，讨厌临时变动",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["J","P"]},
+    {q:"认识新朋友会让你精力充沛",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["E","I"]},
+    {q:"喜欢构思新想法，而不是重复熟悉的工作",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["N","S"]},
+    {q:"做选择优先照顾别人感受和人际关系",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["F","T"]},
+    {q:"习惯随性安排，不把计划定死",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["P","J"]},
+    {q:"多人场合愿意主动表达观点",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["E","I"]},
+    {q:"看说明，更关注实际操作步骤",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["S","N"]},
+    {q:"争论更容易被道理说服，而非情绪",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["T","F"]},
+    {q:"任务要有明确截止时间，不能无限拖延",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["J","P"]},
+    {q:"长时间独自做事，会感到孤单",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["E","I"]},
+    {q:"经常去琢磨事情背后隐藏含义",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["N","S"]},
+    {q:"评价事情，首先考虑会不会伤害他人",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["F","T"]},
+    {q:"突发变动不会让你烦躁不安",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["P","J"]},
+    {q:"遇到事情习惯先开口，而不是默默观察",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["E","I"]},
+    {q:"更相信亲身经历，不爱抽象理论",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["S","N"]},
+    {q:"很难硬下心拒绝身边人的请求",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["F","T"]},
     {q:"房间、文件尽量保持整齐有序",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["J","P"]},
-    {q:"安静环境里，你思路更清晰",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["I","E"]},
-    {q:"你对未来的想象多于对当下现实关注",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["N","S"]},
-    {q:"公平规则比人情优先",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["T","F"]},
+    {q:"安静环境思路更清晰",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["I","E"]},
+    {q:"对未来想象，多于关注当下现实",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["N","S"]},
+    {q:"规则公平优先于人情",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["T","F"]},
     {q:"更喜欢即兴安排，讨厌死板时间表",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["P","J"]},
-    {q:"遇到压力，你会找人倾诉释放情绪",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["E","I"]},
-    {q:"学习新知识，你优先看实例案例",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["S","N"]},
-    {q:"你做决定很容易共情对方处境",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["F","T"]},
-    {q:"事情没做完，心里会一直惦记放不下",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["J","P"]},
-    {q:"大量社交之后，你会觉得疲惫需要休息",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["I","E"]},
-    {q:"你喜欢寻找事物之间潜在联系",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["N","S"]},
-    {q:"对错标准是客观规则，不受情绪影响",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["T","F"]},
+    {q:"压力大时，找人倾诉释放情绪",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["E","I"]},
+    {q:"学新知识优先看实例案例",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["S","N"]},
+    {q:"做决定很容易共情对方处境",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["F","T"]},
+    {q:"事情没做完，心里会一直惦记",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["J","P"]},
+    {q:"大量社交之后，疲惫需要休息",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["I","E"]},
+    {q:"喜欢寻找事物之间潜在联系",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["N","S"]},
+    {q:"对错是客观规则，不受情绪影响",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["T","F"]},
     {q:"截止日前最后冲刺效率最高",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["P","J"]},
-    {q:"想到什么就直接说，不喜欢反复斟酌措辞",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["E","I"]},
-    {q:"你更擅长处理当下具体问题，不是长远设想",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["S","N"]},
-    {q:"团队里，你优先维护大家和谐氛围",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["F","T"]},
-    {q:"重要事项，你喜欢提前写计划清单",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["J","P"]},
-    {q:"你经常内心思考，较少主动表达想法",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["I","E"]},
-    {q:"你喜欢探索新可能性，不固守旧经验",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["N","S"]},
-    {q:"批评别人时，你优先讲客观事实",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["T","F"]},
-    {q:"计划被打乱，你能快速适应调整",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["P","J"]},
-    {q:"认识新朋友对你来说轻松自然",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["E","I"]},
-    {q:"描述事情，习惯讲真实细节，不夸张想象",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["S","N"]},
-    {q:"你害怕直言伤害到别人感情",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["F","T"]},
-    {q:"你倾向一次性把事情收尾，不喜欢悬着",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["J","P"]},
-    {q:"人多嘈杂环境会消耗你的精力",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["I","E"]},
-    {q:"你喜欢畅想未来，构思全新方案",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["N","S"]},
-    {q:"哪怕伤和气，道理也必须讲清楚",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["T","F"]},
+    {q:"想到什么直接说，不反复斟酌措辞",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["E","I"]},
+    {q:"擅长处理当下问题，不是长远设想",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["S","N"]},
+    {q:"团队优先维护大家和谐氛围",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["F","T"]},
+    {q:"重要事情，习惯提前写计划清单",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["J","P"]},
+    {q:"经常内心思考，很少主动表达想法",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["I","E"]},
+    {q:"喜欢探索新可能性，不固守旧经验",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["N","S"]},
+    {q:"批评别人优先讲客观事实",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["T","F"]},
+    {q:"计划打乱，能快速适应调整",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["P","J"]},
+    {q:"认识新朋友对你轻松自然",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["E","I"]},
+    {q:"描述事情习惯讲真实细节，不夸张想象",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["S","N"]},
+    {q:"害怕直言会伤害别人感情",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["F","T"]},
+    {q:"倾向一次性收尾，不喜欢事情悬着",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["J","P"]},
+    {q:"嘈杂环境会消耗你的精力",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["I","E"]},
+    {q:"喜欢畅想未来，构思全新方案",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["N","S"]},
+    {q:"哪怕伤和气，道理也要讲清楚",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["T","F"]},
     {q:"保留多种选择，不喜欢早早定死结果",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["P","J"]},
 ];
 const quotes = {
@@ -284,12 +286,13 @@ function showResult(){
     startFireworks();
 }
 
-//雷达图
+//雷达图 修复undefined，中文标签
 function drawRadar(){
     if(radarChart) radarChart.destroy();
     const ctxRadar = document.createElement('canvas');
-    document.getElementById("radarBox").innerHTML="";
-    document.getElementById("radarBox").appendChild(ctxRadar);
+    const radarWrap = document.getElementById("radarBox");
+    radarWrap.innerHTML="";
+    radarWrap.appendChild(ctxRadar);
     radarChart = new Chart(ctxRadar,{
         type:"radar",
         data:{
@@ -356,21 +359,19 @@ document.getElementById("sendFlowerBtn").onclick = function(e){
 const msgModal = document.getElementById("msgModal");
 document.getElementById("msgBtn").onclick = ()=>msgModal.style.display="flex";
 function closeMsgModal(){msgModal.style.display="none"}
-function copyMsg(){
+function sendMsg(){
     const txt = document.getElementById("msgInput").value.trim();
-    if(!txt) return alert("请输入留言内容");
-    navigator.clipboard.writeText(txt).then(()=>{
-        alert("✅悄悄话复制成功，可以发给开发者");
-        closeMsgModal();
-    })
+    if(!txt) return alert("请输入悄悄话内容");
+    alert("发送成功 ✅\n开发者收不到这条消息，但是他感受到你的想法啦");
+    closeMsgModal();
 }
 
 //100万现金按钮
 document.getElementById("moneyBtn").onclick = function(){
     if(isJinYang){
-        alert("哈哈金阳大气！不过是虚拟特效，心意收到啦 🥳");
+        alert("支付成功\n哈哈金阳大气！这是虚拟特效，心意收到啦 🥳");
     }else{
-        alert("哇，大手笔！虚拟红包，心意收下 ✨");
+        alert("支付成功\n哇，大手笔！这是虚拟特效，心意收到 ✨");
     }
 }
 
@@ -391,7 +392,7 @@ document.getElementById("shareBtn").onclick = function(){
     cardChart = new Chart(cardCtx,{
         type:"radar",
         data:{
-            labels:["E","I","S","N","T","F","J","P"],
+            labels:["E外向","I内向","S实感","N直觉","T思考","F情感","J判断","P感知"],
             datasets:[{data:[score.E,score.I,score.S,score.N,score.T,score.F,score.J,score.P],backgroundColor:"rgba(115,155,216,0.2)",borderColor:"#739bd8",pointBackgroundColor:"#739bd8"}]
         },
         options:{scales:{r:{min:0,max:16}},maintainAspectRatio:false}
@@ -406,6 +407,14 @@ document.getElementById("saveCardBtn").onclick = function(){
         link.href = canvas.toDataURL("image/png");
         link.click();
     })
+}
+
+//重新测试按钮
+document.getElementById("restartBtn").onclick = function(){
+    score={E:0,I:0,S:0,N:0,T:0,F:0,J:0,P:0};
+    current=0;
+    document.getElementById("result").style.display="none";
+    document.getElementById("welcome").style.display="block";
 }
 </script>
 </body>
