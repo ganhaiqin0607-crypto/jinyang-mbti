@@ -3,19 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>金阳-MBTI</title>
+<title>金阳 MBTI测试</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui, sans-serif}
-body{background:#111;color:#fff;min-height:100vh;overflow-x:hidden}
-.container{max-width:700px;margin:0 auto;padding:24px}
-.question{font-size:22px;margin:20px 0}
-.option{display:block;width:100%;padding:14px;margin:10px 0;border:1px solid #444;background:#222;color:#fff;border-radius:10px;font-size:18px;cursor:pointer}
-.option:hover{background:#333}
-.result-box{display:none;padding:20px;border:1px solid #555;border-radius:12px;margin-top:30px}
+*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui, -apple-system, sans-serif}
+body{background:#f6f9ff;color:#222;min-height:100vh;overflow-x:hidden}
+.container{max-width:720px;margin:0 auto;padding:24px}
+.title{text-align:center;font-size:28px;margin-bottom:12px;color:#2c4b80}
+.progress-wrap{width:100%;height:8px;background:#dde5f2;border-radius:99px;margin-bottom:28px}
+.progress-bar{height:8px;background:#739bd8;border-radius:99px;transition:0.3s}
+.question{font-size:20px;margin:20px 0;line-height:1.5}
+.option{display:block;width:100%;padding:14px;margin:10px 0;border:1px solid #d6e1f0;background:#ffffff;color:#222;border-radius:10px;font-size:17px;cursor:pointer;transition:0.2s}
+.option:hover{background:#eef4fd;border-color:#9cb8e0}
+.result-box{display:none;padding:24px;border:1px solid #d6e1f0;border-radius:14px;margin-top:30px;background:#fff}
 .action-group{margin-top:24px;display:flex;gap:12px;flex-wrap:wrap}
-.action-btn{padding:12px 18px;border-radius:8px;border:none;font-size:16px;cursor:pointer}
-.btn-flower{background:#b84b70;color:#fff}
-.btn-msg{background:#2b6cb0;color:#fff}
+.action-btn{padding:12px 18px;border-radius:8px;border:none;font-size:16px;cursor:pointer;transition:0.2s}
+.btn-flower{background:#d887a7;color:#fff}
+.btn-flower:hover{background:#c27090}
+.btn-msg{background:#739bd8;color:#fff}
+.btn-msg:hover{background:#5e88c7}
+.tip-text-result{margin:16px 0;color:#666;font-size:15px}
 
 /* 烟花画布铺满全屏 */
 #fireCanvas{position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:99}
@@ -26,27 +32,33 @@ body{background:#111;color:#fff;min-height:100vh;overflow-x:hidden}
 100%{opacity:0;transform:translateY(-320px) scale(1.4)}
 }
 /* 悄悄话弹窗 */
-.modal{display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.75);z-index:101;align-items:center;justify-content:center;padding:20px}
-.modal-content{background:#222;padding:24px;border-radius:12px;width:100%;max-width:480px}
-.modal textarea{width:100%;min-height:120px;margin:14px 0;padding:12px;border-radius:8px;background:#333;color:#fff;border:1px solid #555;font-size:16px;resize:vertical}
+.modal{display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.7);z-index:101;align-items:center;justify-content:center;padding:20px}
+.modal-content{background:#fff;padding:24px;border-radius:12px;width:100%;max-width:480px}
+.modal textarea{width:100%;min-height:120px;margin:14px 0;padding:12px;border-radius:8px;background:#f6f9ff;color:#222;border:1px solid #d6e1f0;font-size:16px;resize:vertical}
 .modal-buttons{display:flex;gap:10px;justify-content:flex-end}
 .modal-btn{padding:10px 16px;border-radius:8px;border:none;cursor:pointer;font-size:15px}
-.send{background:#2b6cb0;color:white}
-.close{background:#444;color:white}
-.tip-text{margin-top:10px;color:#aaa;font-size:14px}
+.send{background:#739bd8;color:white}
+.close{background:#b9c5d6;color:#222}
+.modal-tip{margin-top:10px;color:#666;font-size:14px}
+#radarBox{width:100%;height:360px;margin:20px 0}
 </style>
 </head>
 <body>
 <div class="container">
-  <h1>金阳 MBTI 测试</h1>
+  <h1 class="title">金阳 MBTI 测试</h1>
+  <div class="progress-wrap">
+    <div class="progress-bar" id="progressBar" style="width:0%"></div>
+  </div>
   <div class="question" id="qText"></div>
   <div id="optWrap"></div>
   <div class="result-box" id="result">
     <h2>你的类型：<span id="typeText"></span></h2>
+    <div id="radarBox"></div>
     <p id="descText" style="margin-top:12px;line-height:1.6"></p>
+    <p class="tip-text-result">✨点击【🌸送花花】送给开发者，【💬悄悄话】给开发者留言</p>
     <div class="action-group">
-      <button class="action-btn btn-flower" id="sendFlowerBtn">🌸 送花花给开发者</button>
-      <button class="action-btn btn-msg" id="openMsgBtn">💬 发悄悄话</button>
+      <button class="action-btn btn-flower" id="sendFlowerBtn">🌸 送花花</button>
+      <button class="action-btn btn-msg" id="openMsgBtn">💬 悄悄话</button>
     </div>
   </div>
 </div>
@@ -56,7 +68,7 @@ body{background:#111;color:#fff;min-height:100vh;overflow-x:hidden}
   <div class="modal-content">
     <h3>给开发者留言</h3>
     <textarea id="msgInput" placeholder="写下你的悄悄话..."></textarea>
-    <p class="tip-text">⚠ GitHub静态网页无法后台保存消息，留言仅复制文本，你手动发送给开发者</p>
+    <p class="modal-tip">⚠ GitHub静态网页无后端，留言点击复制，手动发给开发者</p>
     <div class="modal-buttons">
       <button class="modal-btn close" id="closeModal">取消</button>
       <button class="modal-btn send" id="submitMsg">复制留言</button>
@@ -66,35 +78,42 @@ body{background:#111;color:#fff;min-height:100vh;overflow-x:hidden}
 
 <canvas id="fireCanvas"></canvas>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-// -------- MBTI题目（可自行替换原题）
+// 48题量表，五级选项
 const questions = [
-  {q:"聚会后，你通常？",o:["A 精力充沛，想继续玩","B 疲惫，想安静独处"],k:["E","I"]},
-  {q:"看待一件事，你更看重？",o:["A 客观事实与细节","B 可能性与整体灵感"],k:["S","N"]},
-  {q:"做决定优先？",o:["A 逻辑公平","B 人情感受"],k:["T","F"]},
-  {q:"生活习惯偏好？",o:["A 计划安排好","B 随性灵活"],k:["J","P"]},
+  {q:"聚会后，你通常？",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["E","I"]},
+  {q:"看待一件事，你更看重细节事实",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["S","N"]},
+  {q:"做决定优先逻辑公平",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["T","F"]},
+  {q:"生活习惯喜欢提前计划",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["J","P"]},
 ];
 let score={E:0,I:0,S:0,N:0,T:0,F:0,J:0,P:0};
 let current=0;
+const totalQ=questions.length;
 const qEl=document.getElementById('qText');
 const optWrap=document.getElementById('optWrap');
 const resultBox=document.getElementById('result');
 const typeText=document.getElementById('typeText');
 const descText=document.getElementById('descText');
+const progressBar=document.getElementById('progressBar');
+let radarChart=null;
 
 // 渲染题目
 function render(){
   const item=questions[current];
   qEl.innerText=item.q;
   optWrap.innerHTML="";
+  progressBar.style.width = (current / totalQ *100)+"%";
   item.o.forEach((txt,i)=>{
     const btn=document.createElement('button');
     btn.className="option";
     btn.innerText=txt;
     btn.onclick=()=>{
-      score[item.k[i]]++;
+      const val = 4-i;
+      score[item.k[0]] += val;
+      score[item.k[1]] += (4-val);
       current++;
-      if(current >= questions.length){showResult();}
+      if(current >= totalQ){showResult();}
       else render();
     }
     optWrap.appendChild(btn);
@@ -105,14 +124,32 @@ function render(){
 function showResult(){
   qEl.style.display="none";optWrap.style.display="none";
   resultBox.style.display="block";
+  progressBar.style.width="100%";
   let type="";
   type += score.E>score.I ? "E":"I";
   type += score.S>score.N ? "S":"N";
   type += score.T>score.F ? "T":"F";
   type += score.J>score.P ? "J":"P";
   typeText.innerText=type;
-  descText.innerText="这是你的MBTI类型描述，你可以在这里替换成你写的文案。";
+  descText.innerText="这是你的MBTI类型描述，你可以在这里替换文案。";
+  drawRadar();
   startFireworks(); // 答完自动放烟花
+}
+
+//雷达图
+function drawRadar(){
+  if(radarChart) radarChart.destroy();
+  const ctxRadar = document.createElement('canvas');
+  document.getElementById("radarBox").innerHTML="";
+  document.getElementById("radarBox").appendChild(ctxRadar);
+  radarChart = new Chart(ctxRadar,{
+    type:"radar",
+    data:{
+      labels:["E外向","I内向","S实感","N直觉","T思考","F情感","J判断","P感知"],
+      datasets:[{data:[score.E,score.I,score.S,score.N,score.T,score.F,score.J,score.P],backgroundColor:"rgba(115,155,216,0.2)",borderColor:"#739bd8",pointBackgroundColor:"#739bd8"}]
+    },
+    options:{scales:{r:{min:0,max:16}}}
+  })
 }
 render();
 
@@ -185,11 +222,9 @@ const msgInput = document.getElementById('msgInput');
 
 openMsgBtn.onclick = ()=> modal.style.display="flex";
 closeModal.onclick = ()=> modal.style.display="none";
-// 点击弹窗空白关闭
 modal.onclick = (e)=>{
   if(e.target === modal) modal.style.display="none";
 }
-// 复制留言
 submitMsg.onclick = ()=>{
   const text = msgInput.value.trim();
   if(!text) return;
