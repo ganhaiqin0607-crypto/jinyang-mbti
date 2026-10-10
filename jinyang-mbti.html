@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>金阳专属｜MBTI人格深度测试</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft Yahei",system-ui,sans-serif;}
+body{background:#f7fafe;min-height:100vh;padding:20px 10px;}
+.container{max-width:750px;margin:0 auto;}
+.card{background:#ffffff;border-radius:18px;padding:26px;box-shadow:0 4px 12px rgba(120,150,220,0.08);margin-bottom:18px;}
+h1{color:#486fc9;text-align:center;font-size:25px;margin-bottom:10px;}
+h2{color:#3a3a3a;font-size:19px;margin-bottom:8px;}
+h3{color:#444;margin-top:18px;margin-bottom:6px;font-size:17px;}
+p{color:#555;line-height:1.7;font-size:16px;}
+.tip{background:#f0f5ff;color:#486fc9;padding:11px 15px;border-radius:10px;margin:14px 0;}
+.question{display:none;}
+.question.active{display:block;}
+.result{display:none;}
+.option{display:block;width:100%;text-align:left;border:1px solid #e7ecf4;background:#f9fbff;padding:13px 16px;border-radius:10px;margin:7px 0;cursor:pointer;transition:0.22s;}
+.option:hover{background:#edf3ff;border-color:#d2dcf0;}
+.btn{width:100%;padding:13px;border:none;border-radius:10px;background:#547cdb;color:#fff;font-size:16px;cursor:pointer;margin-top:8px;transition:0.2s;}
+.btn:hover{background:#4468bd;}
+.progress{height:7px;width:100%;background:#eef1f7;border-radius:8px;margin:14px 0;overflow:hidden;}
+.progress-bar{height:100%;background:#648be8;width:0%;transition:0.3s;}
+canvas{max-width:100%;margin:18px auto;display:block;}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- 首页欢迎页（专属金阳） -->
+  <div class="card start">
+    <h1>✨ 金阳同学专属 MBTI 人格深度测试 ✨</h1>
+    <p>哈喽金阳！欢迎来到为你单独定制的专属性格测试页面💖</p>
+    <p>本次测试采用<strong>专业无歧义心理学题库</strong>，没有模棱两可的题目，不再出现"看情况、分人、分场景"的尴尬情况！</p>
+    <p>所有题目全部基于你<strong>长期、稳定、本能的真实性格</strong>，不是临时心情、不是偶尔状态！</p>
+    <div class="tip">
+      💡 共48题｜五级精准评分｜生成专属雷达图｜详细性格解析+优势短板+适配方向
+    </div>
+    <button class="btn" onclick="startTest()">开始专属测试 🚀</button>
+  </div>
+
+  <!-- 答题页面 -->
+  <div class="card question">
+    <div class="progress">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <p id="qNum">第 0 / 48 题</p>
+    <h2 id="qTitle"></h2>
+    <div id="optBox"></div>
+  </div>
+
+  <!-- 结果页面 -->
+  <div class="card result">
+    <h1>🎉 金阳同学的测试结果</h1>
+    <canvas id="radarCanvas" width="600" height="420"></canvas>
+    <h2>你的人格类型：<span id="resType" style="color:#486fc9"></span></h2>
+    <p id="resName" style="font-size:18px;font-weight:bold;margin:8px 0;"></p>
+    <p id="resDesc"></p>
+    <h3>🌟 性格优势</h3>
+    <p id="resGood"></p>
+    <h3>⚠️ 成长短板</h3>
+    <p id="resBad"></p>
+    <h3>🎯 适合方向 &amp; 专业/职业参考</h3>
+    <p id="resJob"></p>
+    <button class="btn" onclick="restart()" style="margin-top:22px;">重新测试 🔁</button>
+    <p style="text-align:center;margin-top:18px;color:#888;">愿金阳永远明朗、自信、闪闪发光 ✨</p>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// ====================== 【终极专业48题无歧义题库】 ======================
+const questions = [
+  // E/I 内外向 12题
+  {dim:"EI",q:"相比于独处回血，长期来看，社交互动更能让你唤醒状态、提升活力。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"EI",q:"你习惯性主动表达想法，而不是全部憋在心里自己消化。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"EI",q:"长时间独处会让你感到沉闷，你渴望与人交流、获取外界信息。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"EI",q:"在多人场合，你大多数时候愿意主动参与讨论，而不是默默旁观。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"EI",q:"你的思维模式偏向'边说边想'，交流能帮你理清思路。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"EI",q:"结束一段长期社交后，你疲惫感很低，很快就能恢复状态。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"EI",q:"你更喜欢热闹丰富的生活节奏，而非安静单调的独处节奏。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"EI",q:"遇到压力时，你更倾向找人倾诉缓解，而非独自消化。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"EI",q:"你乐于结识新朋友，对陌生社交不排斥、不恐惧。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"EI",q:"你的情绪和状态容易被外界氛围带动。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"EI",q:"空闲时间，你常态偏好外出互动，而非宅家独处。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"EI",q:"你习惯对外输出，而不是长期向内思考。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+
+  // S/N 实感/直觉 12题
+  {dim:"SN",q:"你更信赖真实发生的事实、细节、经验，而非猜想和灵感。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"SN",q:"你观察事物优先关注当下现状，而非未来可能性。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"SN",q:"你学习更喜欢实操步骤、现成流程，而非抽象理论框架。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"SN",q:"你记忆事物更擅长记住细节、过程、真实场景。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"SN",q:"你不喜欢过度脑洞，更看重落地、实际、看得见的结果。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"SN",q:"你判断事情优先依据经验，而非直觉联想。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"SN",q:"你对细节敏感，容易发现现实中的小问题。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"SN",q:"你讨厌虚无缥缈的空想，偏爱务实具体的内容。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"SN",q:"你理解事物喜欢一步步验证，不喜欢跳跃式猜测。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"SN",q:"你更关注'是什么'，而非'为什么、未来会怎样'。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"SN",q:"你擅长处理现实事务，不擅长抽象畅想。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"SN",q:"你对真实案例更感兴趣，对虚构脑洞兴趣一般。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+
+  // T/F 思考/情感 12题
+  {dim:"TF",q:"做抉择时，你常态优先逻辑、对错、客观规则，而非情绪。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"TF",q:"你评价事情优先看公平合理，而非人情面子。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"TF",q:"争执时你愿意就事论事，不怕氛围尴尬。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"TF",q:"你给建议优先输出最优方案，而非优先安抚情绪。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"TF",q:"你认为理性比心软更能解决问题。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"TF",q:"你不容易被他人情绪裹挟，判断相对独立冷静。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"TF",q:"你讨厌情绪化决策，推崇理智判断。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"TF",q:"你看待问题更看重道理，而非动机好坏。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"TF",q:"团队矛盾你优先解决问题，优先于调和氛围。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"TF",q:"你接受客观批评，不会轻易玻璃心。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"TF",q:"你做事讲究标准统一，不因人而异。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"TF",q:"你更尊重逻辑正义，而非人情包容。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+
+  // J/P 判断/感知 12题
+  {dim:"JP",q:"你喜欢提前规划、尽早完成，不喜欢拖延到最后。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"JP",q:"计划被临时打乱时，你会明显烦躁、不适。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"JP",q:"你偏爱确定、稳定、有序的生活节奏。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"JP",q:"你习惯收尾、落地、做完事情，不喜欢悬而未决。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"JP",q:"你生活物品、事务安排偏向规整有序。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"JP",q:"你做事喜欢定目标、定时间、有安排。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"JP",q:"你讨厌临时突发变动，偏爱稳定流程。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"JP",q:"你会主动收尾任务，不喜欢拖到截止期。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"JP",q:"你更喜欢快速敲定选择，不喜欢长期犹豫观望。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"JP",q:"你习惯提前准备，不喜欢临时赶工。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"JP",q:"你希望生活可控、可预测，不喜欢混乱随机。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]},
+  {dim:"JP",q:"完成一件事会让你极度安心，悬着会让你难受。",o:["完全不符合","不太符合","一般","比较符合","完全符合"]}
+];
+
+const typeData = {
+  ESTJ:{name:"总经理型 ESTJ",desc:"果断务实、自律可靠、极具执行力与管理天赋。做事讲规则、讲效率、讲结果，是团队里天然的组织者与推动者，性格稳重、责任心极强。",good:"自律严谨、执行力强、公私分明、逻辑清晰、稳重靠谱、擅长统筹管理、抗压能力强、做事落地高效。",bad:"容易强势、过于较真、偶尔刻板、不太擅长柔性共情、容易忽略他人情绪感受。",job:"行政管理、工商管理、公务员、法务、财会、运营管理、项目管理、教育管理、人力资源。"},
+  ENTJ:{name:"指挥官型 ENTJ",desc:"天生战略家、野心明朗、格局开阔、领导力出众。擅长长远规划、统筹全局、敢于突破，做事果断霸气，自带领袖气场。",good:"格局大、思维超前、目标感极强、敢闯敢拼、擅长带队、逻辑顶级、抗压耐造、善于创新突破。",bad:"控制欲偏强、耐心不足、容易强势、对低效零容忍、偶尔显得强势激进。",job:"企业管理、创业、战略策划、金融投资、市场运营、公职管理、法律、高端策划类。"},
+  ESFJ:{name:"执政官型 ESFJ",desc:"温柔体贴、热心温暖、共情力强、擅长维系人际关系。心地善良、责任心重，非常照顾身边人的情绪与感受。",good:"待人真诚、情商高、温柔包容、细心负责、擅长协作、人缘极好、懂得换位思考、乐于助人。",bad:"容易过度在意他人看法、心软犹豫、偶尔讨好型、容易内耗、不擅长拒绝别人。",job:"教师、医护、社工、心理咨询、人力资源、客服运营、公关、文化传媒、教育类。"},
+  ENFJ:{name:"主人公型 ENFJ",desc:"温暖且有力量、理想主义、洞察力极强、善于带动他人。温柔又坚定，共情顶级，天生的引导者与治愈者。",good:"温柔通透、洞察力强、擅长鼓励他人、格局善良、情商极高、有感染力、三观端正、愿意付出。",bad:"容易过度共情、为别人内耗、容易操心过多、偶尔自我感动、忽略自己需求。",job:"教育、心理、传媒、主持、公关、策划、公益、人力资源、文化传播。"},
+  ESTP:{name:"企业家型 ESTP",desc:"灵活机敏、反应极快、务实敢冲、擅长把握机会。性格洒脱、临场能力极强，适应力超强，不刻板、不死板。",good:"反应快、胆大灵活、社交能力强、适应力强、执行力迅猛、敢闯敢试、临场发挥极佳。",bad:"耐心偏弱、容易三分钟热度、不喜长期枯燥、偶尔冲动决策。",job:"市场营销、商务、销售、公关、自媒体、活动策划、应急管理、创新创业。"},
+  ENTP:{name:"辩论家型 ENTP",desc:"脑洞炸裂、思维敏捷、热爱思辨、创意无穷。聪明通透、不被束缚、擅长多角度思考，自带有趣灵魂。",good:"智商高、思维灵活、创意丰富、口才优秀、学习能力强、敢质疑、脑洞大、不死板。",bad:"容易三分钟热度、耐心差、爱抬杠、想法多落地少、容易浮躁。",job:"策划、创意、新媒体、编剧、法务、辩论、产品策划、科研创新、市场分析。"},
+  ESFP:{name:"表演者型 ESFP",desc:"阳光鲜活、热情开朗、感染力超强、活在当下。性格可爱、真诚热烈、热爱生活，是身边的小太阳。",good:"活泼乐观、真诚坦率、情商高、氛围感强、热爱生活、感染力强、待人热情。",bad:"专注力偏弱、容易情绪化、缺少长远规划、容易随性。",job:"演艺、主持、新媒体、艺术、设计、活动主持、舞蹈、传媒、短视频创作。"},
+  ENFP:{name:"竞选者型 ENFP",desc:"浪漫理想、温柔通透、脑洞巨大、共情细腻。性格纯粹善良、热爱自由、内心丰盈，永远保有少年感。",good:"温柔善良、想象力丰富、共情极强、有趣治愈、创造力高、真诚纯粹、灵气十足。",bad:"容易内耗、想法太多、执行力偏弱、容易纠结、情绪敏感。",job:"文创、设计、写作、策划、心理、教育、艺术、自媒体、创意行业。"},
+  ISTJ:{name:"物流师型 ISTJ",desc:"严谨踏实、稳重靠谱、极度自律、尽职尽责。做事一丝不苟、踏实落地、守时守信，是最值得信赖的人格。",good:"踏实稳重、细心严谨、责任心爆表、做事靠谱、自律守纪、耐心极强、务实稳健。",bad:"偏保守、不爱变通、略显呆板、不擅长表达情绪、不太敢突破。",job:"财会、审计、档案、公职、技术岗、工程、质检、后勤、行政、数据统计。"},
+  INTJ:{name:"建筑师型 INTJ",desc:"高冷理智、深度思考、思维顶级、独立清醒。自带战略思维、逻辑严密、追求完美、极度自律。",good:"智商顶尖、逻辑缜密、冷静清醒、自律独立、擅长深度思考、目标长远、极其专注。",bad:"性格偏冷、不善社交、完美主义、容易想太多、情感表达弱。",job:"科研、编程、工程、数据分析、金融、战略、设计、高端技术、学术研究。"},
+  ISFJ:{name:"守卫者型 ISFJ",desc:"温柔内敛、默默付出、细腻体贴、善良忠诚。不爱张扬、踏实温暖、默默守护身边的人，极其温柔可靠。",good:"温柔细心、忠诚专一、踏实稳重、体贴他人、耐心极强、做事认真、懂得感恩。",bad:"过度付出、不懂拒绝、容易委屈自己、内向被动、不善表达需求。",job:"医护、教师、文职、行政、护理、客服、档案、幼教、辅助类岗位。"},
+  INFJ:{name:"提倡者型 INFJ",desc:"最稀有人格！通透温柔、内心深邃、洞察力逆天、理想纯粹。外表安静，内心格局极大，温柔且强大。",good:"通透清醒、洞察力极强、三观超正、温柔坚定、共情顶级、思想深刻、善良有底线。",bad:"极度内耗、思虑过重、容易压抑自己、过度敏感、习惯性自愈。",job:"心理咨询、写作、文化、教育、策划、公益、科研、哲学、艺术创作。"},
+  ISTP:{name:"手艺人型 ISTP",desc:"冷静理智、动手超强、务实洒脱、擅长解决实际问题。性格淡然、思维精准、擅长实操与拆解问题。",good:"冷静沉着、动手能力强、思维精准、适应力强、理性通透、擅长临场解决问题。",bad:"话少冷淡、不爱解释、随性散漫、缺乏长期规划、情绪淡漠。",job:"技术工种、编程、工程、维修、设计、数据分析、机械、测试、实操技术岗。"},
+  INTP:{name:"逻辑学家型 INTP",desc:"纯粹学者人格、思维自由、逻辑顶级、热爱钻研。脑洞巨大、理性通透、痴迷思考与理论探索。",good:"逻辑超强、智商极高、爱钻研、思维自由、理性客观、学习能力极强。",bad:"拖延严重、不爱落地、想法超多行动少、社交被动、容易佛系摆烂。",job:"编程、科研、数学、理论研究、数据分析、人工智能、学术、设计逻辑。"},
+  ISFP:{name:"探险家型 ISFP",desc:"温柔细腻、审美极佳、热爱自由、内心柔软。低调温柔、不善张扬，拥有独特灵气与艺术天赋。",good:"温柔治愈、审美高级、细腻敏感、真诚纯粹、热爱生活、有艺术天赋、性格柔软。",bad:"内向被动、缺乏安全感、害怕压力、容易逃避、不擅长争取。",job:"美术、设计、摄影、音乐、手工、文创、花艺、美学相关、自由职业。"},
+  INFP:{name:"调停者型 INFP",desc:"治愈温柔、纯粹浪漫、内心柔软、理想主义。极其善良、共情超强、内心世界丰富细腻。",good:"善良纯粹、温柔治愈、共情满分、想象力丰富、三观干净、内心柔软、真诚待人。",bad:"极度内耗、玻璃心、容易逃避现实、拖延、想法多行动少。",job:"写作、插画、文案、心理、文创、编辑、艺术、自媒体、治愈系创作。"}
+};
+
+let currentQ = 0;
+let score = {E:0,I:0,S:0,N:0,T:0,F:0,J:0,P:0};
+let radarChart = null;
+const totalQ = questions.length;
+
+function startTest(){
+  document.querySelector(".start").style.display = "none";
+  document.querySelector(".question").classList.add("active");
+  alert("✨金阳！测试正式开始啦！认真作答，解锁你的专属人格结果～");
+  renderQ();
+}
+
+function renderQ(){
+  let q = questions[currentQ];
+  document.getElementById("qNum").innerText = `第 ${currentQ+1} / ${totalQ} 题`;
+  document.getElementById("qTitle").innerText = q.q;
+  document.getElementById("optBox").innerHTML = "";
+  let pct = (currentQ / totalQ) * 100;
+  document.getElementById("progressBar").style.width = pct + "%";
+  q.o.forEach((txt,idx)=>{
+    let btn = document.createElement("button");
+    btn.className = "option";
+    btn.innerText = txt;
+    btn.onclick = ()=>{
+      let val = idx;
+      if(q.dim === "EI"){ score.E += val; score.I += 4-val; }
+      else if(q.dim === "SN"){ score.S += val; score.N += 4-val; }
+      else if(q.dim === "TF"){ score.T += val; score.F += 4-val; }
+      else if(q.dim === "JP"){ score.J += val; score.P += 4-val; }
+      currentQ++;
+      if(currentQ >= totalQ){ showResult(); }
+      else{
+        if(currentQ===12||currentQ===24||currentQ===36){
+          alert("💪金阳超棒！已经答完一部分啦，继续加油！");
+        }
+        renderQ();
+      }
+    }
+    document.getElementById("optBox").appendChild(btn);
+  })
+}
+
+function showResult(){
+  document.querySelector(".question").classList.remove("active");
+  document.querySelector(".result").style.display = "block";
+  let e_i = score.E - score.I;
+  let s_n = score.S - score.N;
+  let t_f = score.T - score.F;
+  let j_p = score.J - score.P;
+  let type = "";
+  type += e_i >= 0 ? "E":"I";
+  type += s_n >= 0 ? "S":"N";
+  type += t_f >= 0 ? "T":"F";
+  type += j_p >= 0 ? "J":"P";
+  let data = typeData[type];
+  document.getElementById("resType").innerText = type;
+  document.getElementById("resName").innerText = data.name;
+  document.getElementById("resDesc").innerText = data.desc;
+  document.getElementById("resGood").innerText = data.good;
+  document.getElementById("resBad").innerText = data.bad;
+  document.getElementById("resJob").innerText = data.job;
+  if(radarChart) radarChart.destroy();
+  let ctx = document.getElementById("radarCanvas").getContext("2d");
+  radarChart = new Chart(ctx,{
+    type:"radar",
+    data:{
+      labels:["外向能量(E)","内向沉淀(I)","实感务实(S)","直觉想象(N)","理性思考(T)","感性共情(F)","规划判断(J)","随性感知(P)"],
+      datasets:[{
+        label:"金阳同学 · 人格维度分值",
+        data:[score.E,score.I,score.S,score.N,score.T,score.F,score.J,score.P],
+        backgroundColor:"rgba(84,124,219,0.15)",
+        borderColor:"rgba(84,124,219,0.75)",
+        pointBackgroundColor:"#547cdb",
+        borderWidth:2
+      }]
+    },
+    options:{ scales:{ r:{min:0,max:48,ticks:{display:false}} } }
+  });
+  alert("🥳恭喜金阳！全部作答完成！专属人格结果生成完毕！");
+}
+
+function restart(){
+  currentQ = 0;
+  score = {E:0,I:0,S:0,N:0,T:0,F:0,J:0,P:0};
+  document.querySelector(".result").style.display = "none";
+  document.querySelector(".start").style.display = "block";
+}
+</script>
+</body>
+</html>
+<!-- （注：内容由AI生成） -->
