@@ -1,421 +1,1057 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>金阳 MBTI测试</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui, -apple-system, sans-serif}
-body{background:#f6f9ff;color:#222;min-height:100vh;overflow-x:hidden}
-.container{max-width:720px;margin:0 auto;padding:24px}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MBTI测试</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, sans-serif;
+        }
+        body {
+            background-color: #f7f9fc;
+            padding: 16px;
+        }
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .page {
+            display: none;
+        }
+        .page.active {
+            display: block;
+        }
+        .card {
+            background: #ffffff;
+            border-radius: 20px;
+            padding:24px;
+            box-shadow: 0 2px 12px #0000000d;
+        }
+        h1 {
+            font-size: 28px;
+            margin-bottom:8px;
+            color:#222;
+        }
+        h2 {
+            font-size:20px;
+            color:#222;
+            line-height:1.5;
+        }
+        .sub-title{
+            font-size:18px;
+            color:#345;
+            margin-bottom:24px;
+        }
+        .btn-group{
+            display:grid;
+            grid-template-columns: 1fr 1fr;
+            gap:12px;
+            margin:24px 0;
+        }
+        button{
+            padding:16px;
+            border:none;
+            border-radius:12px;
+            font-size:16px;
+            cursor:pointer;
+        }
+        .input-box{
+            width:100%;
+            padding:14px;
+            border:1px solid #ccd6e0;
+            border-radius:12px;
+            font-size:16px;
+            margin:12px 0 24px;
+        }
+        .result-tag{
+            font-size:22px;
+            color:#2b549c;
+            margin:12px 0 16px;
+            font-weight:500;
+        }
+        .desc-block{
+            background:#f4f7fd;
+            padding:20px;
+            border-radius:16px;
+            line-height:1.7;
+            font-size:17px;
+            color:#222;
+            margin-bottom:20px;
+        }
+        .radar-wrap{
+            width:100%;
+            height:340px;
+            padding:12px 28px;
+            background:transparent;
+            position:relative;
+        }
+        .tip-text{
+            margin:20px 0;
+            font-size:16px;
+            color:#444;
+            line-height:1.6;
+        }
+        #shareCard{
+            background:#fff;
+            padding:24px;
+            width:100%;
+        }
+        #shareCard .radar-wrap{
+            height:300px;
+            padding:8px 20px;
+            background:transparent;
+        }
+        .edit-name{
+            color:#2b549c;
+            text-decoration:underline;
+            cursor:pointer;
+        }
+        .mask{
+            position:fixed;
+            top:0;
+            left:0;
+            width:100%;
+            height:100%;
+            background:rgba(0,0,0,0.55);
+            display:none;
+            align-items:center;
+            justify-content:center;
+            z-index:999;
+        }
+        .mask.show{
+            display:flex;
+        }
+        .modal{
+            background:#fff;
+            border-radius:16px;
+            padding:24px;
+            width:84%;
+            max-width:420px;
+        }
+        .modal h3{
+            margin-bottom:16px;
+        }
+        .modal .modal-btn-group{
+            display:flex;
+            gap:12px;
+            margin-top:20px;
+            justify-content:flex-end;
+        }
+        .modal-btn{
+            padding:10px 20px;
+            border-radius:10px;
+        }
+        .modal-btn.confirm{
+            background:#2b549c;
+            color:white;
+        }
+        .modal-btn.cancel{
+            background:#eee;
+        }
 
-/* 欢迎首页 */
-.welcome-box{display:block;text-align:center;padding:40px 20px}
-.welcome-box h1{font-size:28px;color:#2c4b80;margin-bottom:16px}
-.welcome-box p{font-size:17px;color:#444;margin-bottom:32px;line-height:1.6}
-.welcome-btn-group{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
-.welcome-btn{padding:14px 24px;border-radius:10px;border:none;font-size:17px;cursor:pointer;transition:0.2s}
-.btn-yes{background:#739bd8;color:#fff}
-.btn-yes:hover{background:#5e88c7}
-.btn-no{background:#dde5f2;color:#222}
-.btn-no:hover{background:#c8d7ee}
-.welcome-tip{margin-top:24px;font-size:14px;color:#777}
+        /* 欢迎页两个身份按钮：跟答题选项同款，选中后浅蓝填充 */
+        .id-btn{
+            background:#fff;
+            color:#333;
+            border:1.5px solid #d7dee8;
+            transition:all .15s;
+        }
+        .id-btn.picked{
+            background:#e8efff;
+            color:#2b549c;
+            border-color:#6284cb;
+            font-weight:600;
+        }
 
-/* 答题页 */
-.quiz-box{display:none}
-.title{text-align:center;font-size:28px;margin-bottom:12px;color:#2c4b80}
-.progress-wrap{width:100%;height:8px;background:#dde5f2;border-radius:99px;margin-bottom:28px}
-.progress-bar{height:8px;background:#739bd8;border-radius:99px;transition:0.3s}
-.question{font-size:20px;margin:20px 0;line-height:1.5}
-.option{display:block;width:100%;padding:14px;margin:10px 0;border:1px solid #d6e1f0;background:#ffffff;color:#222;border-radius:10px;font-size:17px;cursor:pointer;transition:0.2s}
-.option:hover{background:#eef4fd;border-color:#9cb8e0}
+        /* 答题选项：选中态改成浅色填充 */
+        .option-item{
+            padding:16px;
+            border-radius:12px;
+            border:1.5px solid #d7dee8;
+            margin:10px 0;
+            cursor:pointer;
+            background:#fff;
+            color:#333;
+            transition:all .15s;
+        }
+        .option-item.active{
+            background:#e8efff;
+            color:#2b549c;
+            border-color:#6284cb;
+            font-weight:600;
+        }
 
-/* 结果页 */
-.result-box{display:none;padding:24px;border:1px solid #d6e1f0;border-radius:14px;margin-top:30px;background:#fff}
-.action-group{margin-top:24px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.action-btn{padding:12px 14px;border-radius:8px;border:none;font-size:16px;cursor:pointer;transition:0.2s}
-.btn-flower{background:#d887a7;color:#fff}
-.btn-flower:hover{background:#c27090}
-.btn-msg{background:#739bd8;color:#fff}
-.btn-msg:hover{background:#5e88c7}
-.btn-money{background:#e6b849;color:#222}
-.btn-money:hover{background:#d1a338}
-.btn-share{background:#44b888;color:#fff}
-.btn-share:hover{background:#34a274}
-.btn-reset{width:100%;margin-top:16px;padding:14px;border-radius:8px;border:none;font-size:16px;cursor:pointer;background:#868fc0;color:#fff}
-.btn-reset:hover{background:#6e78a8}
-.tip-text-result{margin:16px 0;color:#666;font-size:15px}
-#radarBox{width:100%;height:360px;margin:20px 0}
+        /* 答题进度：可点击跳转 */
+        .progress-text{
+            text-align:right;
+            font-size:16px;
+            color:#2b549c;
+            margin-bottom:6px;
+            cursor:pointer;
+            user-select:none;
+        }
+        .progress-hint{
+            text-align:right;
+            font-size:12px;
+            color:#9aa5b3;
+            margin-bottom:12px;
+        }
 
-/* 烟花画布 */
-#fireCanvas{position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:99}
-.flower{position:fixed;font-size:36px;pointer-events:none;animation:flyUp 2.2s ease-out forwards;z-index:100}
-@keyframes flyUp{
-0{opacity:1;transform:translateY(0) scale(1)}
-100%{opacity:0;transform:translateY(-320px) scale(1.4)}
-}
+        /* 题目选择面板 */
+        .q-picker-grid{
+            display:grid;
+            grid-template-columns:repeat(6,1fr);
+            gap:8px;
+            margin-top:12px;
+        }
+        .q-cell{
+            padding:10px 0;
+            text-align:center;
+            border-radius:8px;
+            border:1.5px solid #d7dee8;
+            background:#fff;
+            color:#9aa5b3;
+            font-size:14px;
+            cursor:pointer;
+            transition:all .15s;
+        }
+        .q-cell.done{
+            background:#e8efff;
+            color:#2b549c;
+            border-color:#6284cb;
+            font-weight:600;
+        }
+        .q-cell.current{
+            outline:2px solid #2b549c;
+            outline-offset:1px;
+        }
 
-/* 悄悄话弹窗 */
-.modal{display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.7);z-index:101;align-items:center;justify-content:center;padding:20px}
-.modal-content{background:#fff;padding:24px;border-radius:12px;width:100%;max-width:480px}
-.modal h3{margin-bottom:10px}
-.modal textarea{width:100%;min-height:120px;margin:14px 0;padding:12px;border-radius:8px;background:#f6f9ff;color:#222;border:1px solid #d6e1f0;font-size:16px;resize:vertical}
-.modal-btn-group{display:flex;gap:10px;justify-content:flex-end}
-.modal-btn{padding:10px 16px;border-radius:8px;border:none;cursor:pointer;font-size:15px}
-.send{background:#739bd8;color:white}
-.close{background:#b9c5d6;color:#222}
+        /* ====== 满屏花瓣特效 ====== */
+        .flower-layer{
+            position:fixed;
+            top:0; left:0;
+            width:100%; height:100%;
+            pointer-events:none;
+            z-index:1500;
+            overflow:hidden;
+        }
+        .flower-petal{
+            position:absolute;
+            top:-60px;
+            font-size:28px;
+            animation:fall linear forwards;
+            opacity:0.9;
+        }
+        @keyframes fall{
+            0%{ transform:translateY(-60px) rotate(0deg); }
+            100%{ transform:translateY(105vh) rotate(360deg); }
+        }
+        .flower-toast{
+            position:fixed;
+            left:50%;
+            bottom:12%;
+            transform:translateX(-50%);
+            background:rgba(40,30,60,0.92);
+            color:#fff;
+            padding:14px 22px;
+            border-radius:999px;
+            font-size:15px;
+            z-index:1600;
+            animation:toastPop .35s ease;
+            box-shadow:0 6px 20px rgba(0,0,0,.25);
+        }
+        @keyframes toastPop{
+            from{ opacity:0; transform:translateX(-50%) translateY(20px); }
+            to{ opacity:1; transform:translateX(-50%) translateY(0); }
+        }
 
-/* 分享卡片弹窗 */
-.shareModal{display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.75);z-index:102;align-items:center;justify-content:center;padding:16px}
-.shareCardWrap{background:#fff;padding:20px;border-radius:16px;max-width:420px;width:100%}
-#shareCard{background:linear-gradient(135deg,#e8f0fe,#dcebff);padding:28px 20px;border-radius:14px;text-align:center}
-#shareCard h2{color:#2c4b80;font-size:24px;margin-bottom:8px}
-#shareCard .sub-title{color:#4a6792;font-size:15px;margin-bottom:16px}
-#shareCard .type-text{font-size:42px;font-weight:bold;color:#2c4b80;margin:12px 0}
-#shareCard .quote{margin:16px 0;color:#333;font-size:16px}
-#shareCard .footer-note{margin-top:22px;color:#666;font-size:14px}
-#cardRadar{width:100%;height:240px}
-.shareBtnGroup{margin-top:16px;display:flex;gap:10px;justify-content:center}
-.saveCardBtn,.closeShareBtn{padding:11px 18px;border-radius:8px;border:none;cursor:pointer;font-size:16px}
-.saveCardBtn{background:#44b888;color:#fff}
-.closeShareBtn{background:#b9c5d6}
-</style>
+        /* ====== 满屏弹幕 ====== */
+        .danmu-layer{
+            position:fixed;
+            top:0; left:0;
+            width:100%; height:100%;
+            pointer-events:none;
+            z-index:1500;
+            overflow:hidden;
+        }
+        .danmu-item{
+            position:absolute;
+            white-space:nowrap;
+            font-size:18px;
+            color:#fff;
+            background:rgba(43,84,156,0.85);
+            padding:6px 14px;
+            border-radius:999px;
+            animation:danmuFly linear forwards;
+        }
+        @keyframes danmuFly{
+            from{ transform:translateX(100vw); }
+            to{ transform:translateX(-100%); }
+        }
+
+        /* ====== 满屏烟花 ====== */
+        #fireworksCanvas{
+            position:fixed;
+            inset:0;
+            z-index:1300;
+            pointer-events:none;
+        }
+
+        /* ====== NFC 百元钞支付成功 ====== */
+        .nfc-overlay{
+            position:fixed;
+            inset:0;
+            background:rgba(0,0,0,0.85);
+            z-index:1400;
+            display:none;
+            align-items:center;
+            justify-content:center;
+            flex-direction:column;
+        }
+        .nfc-overlay.show{ display:flex; }
+        .nfc-card{
+            width:300px;
+            height:150px;
+            border-radius:14px;
+            background:linear-gradient(135deg,#d93030 0%,#a81818 60%,#8a1010 100%);
+            color:#fff;
+            padding:14px 18px;
+            box-shadow:0 12px 40px rgba(217,48,48,.5);
+            position:relative;
+            opacity:0;
+            transform:translateY(200px) rotateX(-60deg);
+            animation:cardUp .8s cubic-bezier(.2,.8,.2,1) forwards;
+            font-family:"STKaiti","KaiTi",serif;
+            overflow:hidden;
+        }
+        @keyframes cardUp{
+            0%{ opacity:0; transform:translateY(200px) rotateX(-60deg); }
+            60%{ opacity:1; transform:translateY(-10px) rotateX(10deg); }
+            100%{ opacity:1; transform:translateY(0) rotateX(0); }
+        }
+        .nfc-card .bank{
+            font-size:13px;
+            letter-spacing:2px;
+            opacity:.9;
+        }
+        .nfc-card .num{
+            position:absolute;
+            right:16px;
+            bottom:8px;
+            font-size:42px;
+            font-weight:bold;
+            font-family:Georgia,serif;
+        }
+        .nfc-card .yuan{
+            position:absolute;
+            left:18px;
+            bottom:14px;
+            font-size:16px;
+        }
+        .nfc-card .portrait{
+            position:absolute;
+            left:50%;
+            top:50%;
+            transform:translate(-50%,-50%);
+            width:62px;
+            height:62px;
+            border-radius:50%;
+            background:rgba(255,255,255,0.15);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:34px;
+        }
+        .nfc-check{
+            margin-top:30px;
+            width:70px;
+            height:70px;
+            border-radius:50%;
+            background:#34c759;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            color:#fff;
+            font-size:40px;
+            opacity:0;
+            animation:checkPop .4s ease .7s forwards;
+            box-shadow:0 0 0 0 rgba(52,199,89,.5);
+        }
+        @keyframes checkPop{
+            0%{ opacity:0; transform:scale(.3); }
+            60%{ opacity:1; transform:scale(1.15); box-shadow:0 0 0 18px rgba(52,199,89,0); }
+            100%{ opacity:1; transform:scale(1); box-shadow:0 0 0 0 rgba(52,199,89,0); }
+        }
+        .nfc-text{
+            margin-top:16px;
+            color:#fff;
+            font-size:20px;
+            letter-spacing:2px;
+            opacity:0;
+            animation:checkPop .3s ease 1s forwards;
+        }
+    </style>
 </head>
 <body>
 <div class="container">
-    <!-- 欢迎首页 -->
-    <div class="welcome-box" id="welcome">
-        <h1>✨这份MBTI测试，专门给金阳定制！</h1>
-        <p>欢迎来到专属人格小测试 🥳<br>请先告诉我：你是金阳本人吗？</p>
-        <div class="welcome-btn-group">
-            <button class="welcome-btn btn-yes" onclick="setIdentity(true)">✅ 我就是金阳</button>
-            <button class="welcome-btn btn-no" onclick="setIdentity(false)">🔘 我不是金阳</button>
+    <div id="welcomePage" class="page active">
+        <div class="card">
+            <h1>✨这份MBTI测试，专门给金阳定制！</h1>
+            <div class="sub-title">欢迎来到专属人格小测试 🥳 请先告诉我：你是金阳本人吗？</div>
+            <div class="btn-group">
+                <button id="btnIsMe" class="id-btn">✅ 我就是金阳</button>
+                <button id="btnNotMe" class="id-btn">🔘 我不是金阳</button>
+            </div>
+            <input id="nameInput" class="input-box" style="display:none;" placeholder="请输入你的名字">
+            <button id="startBtn" class="id-btn picked" style="width:100%;display:none;font-size:17px;font-weight:600;">🚀 开始测试</button>
         </div>
-        <p class="welcome-tip">本次测试一共48道小题，几分钟完成</p>
     </div>
 
-    <!-- 答题区域 -->
-    <div class="quiz-box" id="quiz">
-        <h1 class="title" id="quizTitle">MBTI 测试</h1>
-        <div class="progress-wrap">
-            <div class="progress-bar" id="progressBar" style="width:0%"></div>
+    <div id="questionPage" class="page question-page">
+        <div class="card">
+            <div class="progress-text" id="progressNum" title="点击跳转题目">1/48</div>
+            <h2 id="questionTitle"></h2>
+            <div id="optionBox"></div>
+            <div class="progress-hint" style="text-align:center;margin-top:14px;">👆 点右上角进度数字可跳转任意题目</div>
         </div>
-        <div class="question" id="qText"></div>
-        <div id="optWrap"></div>
     </div>
 
-    <!-- 结果页面 -->
-    <div class="result-box" id="result">
-        <h2>你的类型：<span id="typeText"></span></h2>
-        <div id="radarBox"></div>
-        <p id="descText" style="margin-top:12px;line-height:1.6"></p>
-        <p class="tip-text-result" id="resultTip"></p>
-        <div class="action-group">
-            <button class="action-btn btn-flower" id="sendFlowerBtn">🌸 送花花</button>
-            <button class="action-btn btn-msg" id="msgBtn">💬 发送悄悄话</button>
-            <button class="action-btn btn-money" id="moneyBtn">💰 给开发者100万现金</button>
-            <button class="action-btn btn-share" id="shareBtn">📸 生成分享图</button>
+    <div id="resultPage" class="page">
+        <div class="card">
+            <h1>你的类型：<span id="resultType">ENFJ</span></h1>
+            <div class="result-tag" id="resultShortTag">标签：温暖领袖，善于鼓舞他人</div>
+            <div class="desc-block" id="resultDesc">
+                ENFJ主人公型，擅长读懂他人情绪，共情力强，乐于鼓励别人成长。
+                ✅优点：善于倾听、感染力强、有责任感，适合带队、沟通协调。
+                ⚠️短板：容易过度共情，委屈自己，工作中不懂拒绝，长期容易疲惫。
+            </div>
+            <div class="radar-wrap">
+                <canvas id="radarChart"></canvas>
+            </div>
+            <div class="tip-text">✨<span id="userNameText">金阳</span>，可以选择送花花、发送悄悄话，或者给作者100万现金，还能生成分享图保存</div>
+            <div class="btn-group">
+                <button style="background:#d678a9;color:white;" id="flowerBtn">🌸 送花花</button>
+                <button style="background:#6284cb;color:white;" id="msgBtn">💬 发送悄悄话</button>
+                <button style="background:#e6b048;color:white;" id="moneyBtn">💰 给作者100万现金</button>
+                <button style="background:#48b882;color:white;" id="shareBtn">📸 生成分享图</button>
+            </div>
+            <button id="restartBtn" style="width:100%;background:#7974ab;color:white;">🔄 重新测试</button>
         </div>
-        <button class="btn-reset" id="restartBtn">🔄 重新测试</button>
     </div>
 </div>
 
-<!-- 悄悄话弹窗 -->
-<div class="modal" id="msgModal">
-    <div class="modal-content">
-        <h3>给开发者留言</h3>
-        <textarea id="msgInput" placeholder="写下你的悄悄话...">开发者辛苦啦，这个测试很有意思！</textarea>
+<div class="mask" id="tipMask">
+    <div class="modal">
+        <h3 id="tipTitle">提示</h3>
+        <p id="tipContent"></p>
         <div class="modal-btn-group">
-            <button class="modal-btn close" onclick="closeMsgModal()">取消</button>
-            <button class="modal-btn send" onclick="sendMsg()">发送</button>
+            <button class="modal-btn confirm" id="tipOk">确定</button>
         </div>
     </div>
 </div>
 
-<!-- 分享卡片弹窗 -->
-<div class="shareModal" id="shareModal">
-    <div class="shareCardWrap">
+<div class="mask" id="confirmMask">
+    <div class="modal">
+        <h3>确认</h3>
+        <p id="confirmContent"></p>
+        <div class="modal-btn-group">
+            <button class="modal-btn cancel" id="confirmCancel">取消</button>
+            <button class="modal-btn confirm" id="confirmOk">确定</button>
+        </div>
+    </div>
+</div>
+
+<div class="mask" id="inputMask">
+    <div class="modal">
+        <h3>修改名字</h3>
+        <input class="input-box" id="modalNameInput">
+        <div class="modal-btn-group">
+            <button class="modal-btn cancel" id="inputCancel">取消</button>
+            <button class="modal-btn confirm" id="inputOk">确定</button>
+        </div>
+    </div>
+</div>
+
+<div class="mask" id="msgMask">
+    <div class="modal">
+        <h3>发送悄悄话</h3>
+        <textarea class="input-box" id="msgText" rows="4" style="resize:none;">作者辛苦啦，这个测试很有意思！</textarea>
+        <div class="modal-btn-group">
+            <button class="modal-btn cancel" id="msgCancel">取消</button>
+            <button class="modal-btn confirm" id="msgSend">发送</button>
+        </div>
+    </div>
+</div>
+
+<div class="mask" id="shareCardMask">
+    <div class="modal" style="width:92%;max-width:560px;padding:0;overflow:hidden;border-radius:20px;background:#fff;">
         <div id="shareCard">
-            <h2 id="cardTitle">MBTI人格报告</h2>
-            <div class="sub-title">48题专属测试结果</div>
-            <div id="cardRadar"></div>
-            <div class="type-text" id="cardType">INFP</div>
-            <div class="quote" id="cardQuote"></div>
-            <div class="footer-note">分享给你的朋友</div>
+            <h2><span class="edit-name" id="cardUserName">金阳</span> 的MBTI人格报告</h2>
+            <div style="font-size:18px;color:#2b549c;margin:8px 0 16px;"><span id="cardType">ENFJ</span>｜<span id="cardShort">温暖领袖，善于鼓舞他人</span></div>
+            <div style="background:#f4f7fd;padding:16px;border-radius:12px;line-height:1.6;margin-bottom:16px;" id="cardDesc">
+                ENFJ主人公型，擅长读懂他人情绪，共情力强，乐于鼓励别人成长。✅优点：善于倾听、感染力强、有责任感，适合带队、沟通协调。⚠️短板：容易过度共情，委屈自己，工作中不懂拒绝，长期容易疲惫。
+            </div>
+            <div class="radar-wrap">
+                <canvas id="cardRadarChart"></canvas>
+            </div>
         </div>
-        <div class="shareBtnGroup">
-            <button class="saveCardBtn" id="saveCardBtn">💾 保存图片</button>
-            <button class="closeShareBtn" onclick="closeShareModal()">关闭</button>
+        <div style="padding:16px;display:flex;gap:12px;">
+            <button id="saveCardImgBtn" style="flex:1;background:#48b882;color:white;padding:14px;border-radius:12px;border:none;">💾保存图片</button>
+            <button id="closeCardBtn" style="flex:1;background:#cccccc;color:#333;padding:14px;border-radius:12px;border:none;">关闭</button>
         </div>
     </div>
 </div>
 
-<canvas id="fireCanvas"></canvas>
+<div class="mask" id="qPickerMask">
+    <div class="modal" style="width:92%;max-width:480px;">
+        <h3>跳转题目</h3>
+        <p style="font-size:13px;color:#888;">已答的题目显示为蓝色，点击任意编号直接跳转</p>
+        <div class="q-picker-grid" id="qPickerGrid"></div>
+        <div class="modal-btn-group">
+            <button class="modal-btn cancel" id="qPickerClose">关闭</button>
+        </div>
+    </div>
+</div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<!-- 花瓣特效层 -->
+<div class="flower-layer" id="flowerLayer"></div>
+<!-- 弹幕特效层 -->
+<div class="danmu-layer" id="danmuLayer"></div>
+<!-- 烟花 canvas -->
+<canvas id="fireworksCanvas"></canvas>
+<!-- NFC 支付成功层 -->
+<div class="nfc-overlay" id="nfcOverlay">
+    <div class="nfc-card">
+        <div class="bank">中国人民银行</div>
+        <div class="portrait">👨</div>
+        <div class="yuan">¥</div>
+        <div class="num">100</div>
+    </div>
+    <div class="nfc-check">✓</div>
+    <div class="nfc-text">支付成功</div>
+</div>
+
 <script>
-let isJinYang = false;
-let score={E:0,I:0,S:0,N:0,T:0,F:0,J:0,P:0};
-let current=0;
-let totalQ=48;
-let radarChart=null;
-let cardChart=null;
-// 完整48题
-const questions = [
-    {q:"聚会结束之后，你需要独处恢复精力",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["I","E"]},
-    {q:"你更看重事实细节，而不是想象各种可能性",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["S","N"]},
-    {q:"做决定，优先看逻辑公平",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["T","F"]},
-    {q:"你喜欢提前规划日程，讨厌临时变动",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["J","P"]},
-    {q:"认识新朋友会让你精力充沛",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["E","I"]},
-    {q:"喜欢构思新想法，而不是重复熟悉的工作",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["N","S"]},
-    {q:"做选择优先照顾别人感受和人际关系",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["F","T"]},
-    {q:"习惯随性安排，不把计划定死",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["P","J"]},
-    {q:"多人场合愿意主动表达观点",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["E","I"]},
-    {q:"看说明，更关注实际操作步骤",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["S","N"]},
-    {q:"争论更容易被道理说服，而非情绪",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["T","F"]},
-    {q:"任务要有明确截止时间，不能无限拖延",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["J","P"]},
-    {q:"长时间独自做事，会感到孤单",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["E","I"]},
-    {q:"经常去琢磨事情背后隐藏含义",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["N","S"]},
-    {q:"评价事情，首先考虑会不会伤害他人",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["F","T"]},
-    {q:"突发变动不会让你烦躁不安",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["P","J"]},
-    {q:"遇到事情习惯先开口，而不是默默观察",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["E","I"]},
-    {q:"更相信亲身经历，不爱抽象理论",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["S","N"]},
-    {q:"很难硬下心拒绝身边人的请求",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["F","T"]},
-    {q:"房间、文件尽量保持整齐有序",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["J","P"]},
-    {q:"安静环境思路更清晰",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["I","E"]},
-    {q:"对未来想象，多于关注当下现实",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["N","S"]},
-    {q:"规则公平优先于人情",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["T","F"]},
-    {q:"更喜欢即兴安排，讨厌死板时间表",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["P","J"]},
-    {q:"压力大时，找人倾诉释放情绪",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["E","I"]},
-    {q:"学新知识优先看实例案例",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["S","N"]},
-    {q:"做决定很容易共情对方处境",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["F","T"]},
-    {q:"事情没做完，心里会一直惦记",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["J","P"]},
-    {q:"大量社交之后，疲惫需要休息",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["I","E"]},
-    {q:"喜欢寻找事物之间潜在联系",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["N","S"]},
-    {q:"对错是客观规则，不受情绪影响",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["T","F"]},
-    {q:"截止日前最后冲刺效率最高",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["P","J"]},
-    {q:"想到什么直接说，不反复斟酌措辞",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["E","I"]},
-    {q:"擅长处理当下问题，不是长远设想",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["S","N"]},
-    {q:"团队优先维护大家和谐氛围",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["F","T"]},
-    {q:"重要事情，习惯提前写计划清单",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["J","P"]},
-    {q:"经常内心思考，很少主动表达想法",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["I","E"]},
-    {q:"喜欢探索新可能性，不固守旧经验",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["N","S"]},
-    {q:"批评别人优先讲客观事实",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["T","F"]},
-    {q:"计划打乱，能快速适应调整",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["P","J"]},
-    {q:"认识新朋友对你轻松自然",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["E","I"]},
-    {q:"描述事情习惯讲真实细节，不夸张想象",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["S","N"]},
-    {q:"害怕直言会伤害别人感情",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["F","T"]},
-    {q:"倾向一次性收尾，不喜欢事情悬着",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["J","P"]},
-    {q:"嘈杂环境会消耗你的精力",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["I","E"]},
-    {q:"喜欢畅想未来，构思全新方案",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["N","S"]},
-    {q:"哪怕伤和气，道理也要讲清楚",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["T","F"]},
-    {q:"保留多种选择，不喜欢早早定死结果",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["P","J"]},
-];
-const quotes = {
-    "INFP":"理想藏于心，温柔有力量",
-    "INFJ":"洞察人心，安静而坚定",
-    "INTP":"热爱思考，永远好奇",
-    "INTJ":"远见规划，目标清晰",
-    "ISFP":"活在当下，感受生活",
-    "ISFJ":"细心守护，温暖可靠",
-    "ISTP":"冷静务实，擅长解决难题",
-    "ISTJ":"稳重守序，值得信赖",
-    "ENFP":"永远热烈，充满想象力",
-    "ENFJ":"温暖领袖，善于鼓舞他人",
-    "ENTP":"思辨有趣，脑洞不停",
-    "ENTJ":"果断自信，天生领导者",
-    "ESFP":"鲜活自在，享受当下",
-    "ESFJ":"热心体贴，照顾大家",
-    "ESTP":"灵活果敢，行动力强",
-    "ESTJ":"秩序分明，靠谱管理者"
+let userName = "金阳";
+let radarChart, cardRadarChart;
+let currentQuestionIndex = 0;
+let answers = Array(48).fill(null);
+let score = {E:0,I:0,S:0,N:0,T:0,F:0,J:0,P:0};
+
+const mbtiInfo = {
+    "ENFJ": {short:"温暖领袖，善于鼓舞他人",detail:"ENFJ主人公型，擅长读懂他人情绪，共情力强，乐于鼓励别人成长。✅优点：善于倾听、感染力强、有责任感，适合带队、沟通协调。⚠️短板：容易过度共情，委屈自己，工作中不懂拒绝，长期容易疲惫。"},
+    "INFJ": {short:"洞察人心，安静而坚定",detail:"INFJ提倡者型，内心有清晰信念，善于看透表象，重视深度精神共鸣。✅优点：洞察力强、有原则、专注长远目标，适合战略规划、调研。⚠️短板：习惯把情绪藏内心，容易过度追求完美，反复打磨方案耽误进度。"},
+    "INTJ": {short:"远见规划，目标清晰",detail:"INTJ建筑师型，理性独立，喜欢搭建长远方案，站在全局思考问题。✅优点：逻辑缜密、目标感强、擅长拆解难题，适合策略设计、技术方案。⚠️短板：表达偏直接，容易忽略团队情绪，缺少人情层面考量。"},
+    "INTP": {short:"热爱思考，永远好奇",detail:"INTP逻辑学家型，喜欢钻研理论，享受思考推演，思想开放。✅优点：脑洞大、逻辑分析强、擅长发现漏洞，适合研究、技术开发。⚠️短板：执行力偏弱，经常构思多但难完整收尾。"},
+    "ENFP": {short:"永远热烈，充满想象力",detail:"ENFP竞选者型，热情灵动，擅长捕捉新机会，乐于探索可能性。✅优点：创意丰富、感染力强、适应力强，适合创意策划、内容创作。⚠️短板：新鲜感褪去容易动力下滑，容易同时开多个项目。"},
+    "ENTP": {short:"思辨有趣，脑洞不停",detail:"ENTP辩论家型，思维敏捷，喜欢思辨讨论，乐于挑战固有观点。✅优点：反应快、多角度思考、应变极强，适合商务谈判、创意研讨。⚠️短板：容易抬杠，耐心不足，落地细节容易敷衍。"},
+    "ENTJ": {short:"果断自信，天生领导者",detail:"ENTJ指挥官型，目标驱动，做事干脆，擅长组织资源推动落地。✅优点：统筹强、敢决策、擅长带团队破局，适合团队管理、项目操盘。⚠️短板：性格强势，说话直接，容易无意中打击团队成员。"},
+    "INFP": {short:"理想藏于心，温柔有力量",detail:"INFP调停者型，内心丰富，坚守价值观，柔软共情，不喜冲突。✅优点：细腻有创造力、忠于本心、共情力强，适合文案、艺术创作。⚠️短板：害怕冲突，抗压偏弱，遇到违背价值观的事容易抵触。"},
+    "ISFP": {short:"活在当下，感受生活",detail:"ISFP探险家型，敏感细腻，专注当下，擅长发现生活美好，不爱张扬。✅优点：审美好、动手能力强、适应变化，适合设计、手工实操。⚠️短板：不喜欢长远规划，被严格时间表束缚会觉得压抑。"},
+    "ISTP": {short:"冷静务实，擅长解决难题",detail:"ISTP鉴赏家型，冷静理性，擅长动手实操，遇到问题先找办法。✅优点：动手强、应变好、务实不啰嗦，适合工程、技术维修调试。⚠️短板：不喜长篇说教和繁琐流程，重复书面工作觉得枯燥。"},
+    "ISFJ": {short:"细心守护，温暖可靠",detail:"ISFJ守卫者型，细心体贴，重视责任，默默照顾身边人，信守承诺。✅优点：细心靠谱、耐心负责、注重细节，适合行政、后勤、客服。⚠️短板：习惯优先照顾别人，不懂拒绝，长期积累压力。"},
+    "ISTJ": {short:"稳重守序，值得信赖",detail:"ISTJ物流师型，严谨务实，遵守规则，做事有条理，重视事实细节。✅优点：责任心强、严谨细致，适合档案管理、财务、质检。⚠️短板：不喜大变动，面对临时突发改动适应较慢。"},
+    "ESFP": {short:"鲜活自在，享受当下",detail:"ESFP表演者型，外向鲜活，热爱当下，感染力强，擅长带动现场氛围。✅优点：热情外向、社交力强、擅长现场互动，适合活动执行、直播。⚠️短板：不喜长期枯燥理论工作，需要即时反馈。"},
+    "ESFJ": {short:"热心体贴，照顾大家",detail:"ESFJ执政官型，热心友善，擅长感知他人情绪，维护集体和睦。✅优点：擅长维系人际关系、体贴周到，适合人事、社群运营、客户对接。⚠️短板：很在意他人评价，容易被别人情绪影响。"},
+    "ESTP": {short:"灵活果敢，行动力强",detail:"ESTP企业家型，现实果敢，擅长抓眼前机会，行动优先，临场反应强。✅优点：行动力强、敢尝试、擅长现场突发处理，适合销售、谈判。⚠️短板：容易忽略长期风险，耐心不足，长线项目容易没兴趣。"},
+    "ESTJ": {short:"秩序分明，靠谱管理者",detail:"ESTJ总经理型，讲规则重效率，擅长搭建流程、安排分工。✅优点：执行力强、条理清晰、擅长团队分工统筹，适合运营管理、行政主管。⚠️短板：习惯按规则办事，不太接纳非常规新思路。"}
 };
 
-// 设置身份
-function setIdentity(jinyang){
-    isJinYang = jinyang;
-    document.getElementById("welcome").style.display="none";
-    document.getElementById("quiz").style.display="block";
-    document.getElementById("quizTitle").innerText = isJinYang ? "金阳 MBTI 测试" : "MBTI 测试";
-    render();
-}
-//渲染题目
-function render(){
-    const item=questions[current];
-    document.getElementById("qText").innerText = item.q;
-    const optWrap = document.getElementById("optWrap");
-    optWrap.innerHTML="";
-    document.getElementById("progressBar").style.width = (current/totalQ*100)+"%";
-    item.o.forEach((txt,i)=>{
-        const btn = document.createElement("button");
-        btn.className="option";
-        btn.innerText=txt;
-        btn.onclick=()=>{
-            const val = 4-i;
-            score[item.k[0]] += val;
-            score[item.k[1]] += (4-val);
-            current++;
-            if(current >= totalQ){
-                showResult();
-            }else{
-                render();
-            }
+const questionList = [
+    {q:"认识新朋友，你会不会越聊越嗨？",key:"E"},
+    {q:"聚会散场后，你是不是只想一个人静静？",key:"I"},
+    {q:"你更相信亲身看到的事实，而不是脑补猜想？",key:"S"},
+    {q:"你喜欢琢磨背后的可能性、联想各种脑洞？",key:"N"},
+    {q:"做决定优先讲道理、权衡利弊？",key:"T"},
+    {q:"做决定优先考虑大家感受，不想伤到别人？",key:"F"},
+    {q:"出门喜欢提前做好计划，讨厌临时变动？",key:"J"},
+    {q:"生活随性，临时调整安排你也不反感？",key:"P"},
+    {q:"经常主动找人聊天，很享受热闹氛围？",key:"E"},
+    {q:"长时间社交之后，你会觉得精力被掏空？",key:"I"},
+    {q:"看别人描述事情，你更在意真实细节？",key:"S"},
+    {q:"你经常冒出新想法，喜欢畅想未来？",key:"N"},
+    {q:"争论对错的时候，你不容易被情绪带偏？",key:"T"},
+    {q:"看到别人难过，你很容易跟着共情难受？",key:"F"},
+    {q:"习惯把事情安排妥当，不喜欢临时赶工？",key:"J"},
+    {q:"deadline临近才动手，反而更有干劲？",key:"P"},
+    {q:"和很多人打交道，能让你充满活力？",key:"E"},
+    {q:"休息的时候，更喜欢独处而不是聚会？",key:"I"},
+    {q:"学习新知识，优先看实操案例、真实经验？",key:"S"},
+    {q:"喜欢思考抽象问题，爱挖掘深层含义？",key:"N"},
+    {q:"评价一件事，优先看是否公平合理？",key:"T"},
+    {q:"尽量照顾身边人的情绪，不想产生冲突？",key:"F"},
+    {q:"喜欢固定的作息，打乱计划会觉得烦躁？",key:"J"},
+    {q:"喜欢灵活的节奏，讨厌死板的条条框框？",key:"P"},
+    {q:"遇到陌生人，你能自然开口搭话？",key:"E"},
+    {q:"人多场合你习惯安静旁听，不爱主动发言？",key:"I"},
+    {q:"你很少空想，更看重当下现实情况？",key:"S"},
+    {q:"经常脑补各种可能性，喜欢猜想后续发展？",key:"N"},
+    {q:"就算伤到对方，也愿意说出客观真话？",key:"T"},
+    {q:"别人向你诉苦，你第一反应是共情安慰？",key:"F"},
+    {q:"做完一件事才会放松，悬着任务会一直惦记？",key:"J"},
+    {q:"事情拖着不做，你也不会感到特别焦虑？",key:"P"},
+    {q:"空闲的时候，更愿意约朋友出门玩？",key:"E"},
+    {q:"恢复精力最好的方式就是安静独处？",key:"I"},
+    {q:"你擅长记住细节，很少忽略现实信息？",key:"S"},
+    {q:"你直觉很强，经常凭预感判断事情？",key:"N"},
+    {q:"讨论问题，你更看重逻辑，而不是人情？",key:"T"},
+    {q:"为维持和睦，你会适当妥协自己想法？",key:"F"},
+    {q:"清单规划会让你安心，喜欢一切有序？",key:"J"},
+    {q:"喜欢即兴做事，不喜欢被计划束缚？",key:"P"},
+    {q:"表达想法，你愿意当众直接说出来？",key:"E"},
+    {q:"有想法习惯藏心里，很少当众表达？",key:"I"},
+    {q:"你相信经验，对天马行空的想法保持谨慎？",key:"S"},
+    {q:"喜欢脑洞话题，乐于探索全新概念？",key:"N"},
+    {q:"处理矛盾，优先解决问题而不是安抚情绪？",key:"T"},
+    {q:"你很在意人际关系和谐，怕发生争吵？",key:"F"},
+    {q:"做事有始有终，喜欢尽早收尾完成？",key:"J"},
+    {q:"保留选项，不急着敲定最后的决定？",key:"P"}
+];
+
+const welcomePage = document.getElementById("welcomePage");
+const questionPage = document.getElementById("questionPage");
+const resultPage = document.getElementById("resultPage");
+const nameInput = document.getElementById("nameInput");
+const startBtn = document.getElementById("startBtn");
+const btnIsMe = document.getElementById("btnIsMe");
+const btnNotMe = document.getElementById("btnNotMe");
+const userNameText = document.getElementById("userNameText");
+const cardUserName = document.getElementById("cardUserName");
+const questionTitle = document.getElementById("questionTitle");
+const optionBox = document.getElementById("optionBox");
+const progressNum = document.getElementById("progressNum");
+
+btnIsMe.onclick = function(){
+    userName = "金阳";
+    btnIsMe.classList.add("picked");
+    btnNotMe.classList.remove("picked");
+    nameInput.style.display = "none";
+    startBtn.style.display = "block";
+};
+btnNotMe.onclick = function(){
+    btnNotMe.classList.add("picked");
+    btnIsMe.classList.remove("picked");
+    nameInput.style.display = "block";
+    startBtn.style.display = "block";
+};
+
+startBtn.onclick = function(){
+    if(nameInput.style.display !== "none"){
+        const val = nameInput.value.trim();
+        if(!val){
+            showTip("提示","名字不能为空");
+            return;
         }
-        optWrap.appendChild(btn);
-    })
+        userName = val;
+    }
+    welcomePage.classList.remove("active");
+    questionPage.classList.add("active");
+    userNameText.innerText = userName;
+    cardUserName.innerText = userName;
+    currentQuestionIndex = 0;
+    answers = Array(48).fill(null);
+    score = {E:0,I:0,S:0,N:0,T:0,F:0,J:0,P:0};
+    renderQuestion();
+};
+
+function renderQuestion(){
+    const q = questionList[currentQuestionIndex];
+    questionTitle.innerText = "第" + (currentQuestionIndex+1) + "题｜" + q.q;
+    progressNum.innerText = (currentQuestionIndex+1) + "/48";
+    optionBox.innerHTML = "";
+    const optList = [
+        {text:"非常符合",val:2},
+        {text:"有点符合",val:1},
+        {text:"一般",val:0},
+        {text:"不太符合",val:-1},
+        {text:"完全不符合",val:-2}
+    ];
+    optList.forEach(function(opt){
+        const div = document.createElement("div");
+        div.className = "option-item";
+        if(answers[currentQuestionIndex] && answers[currentQuestionIndex].text === opt.text){
+            div.classList.add("active");
+        }
+        div.innerText = opt.text;
+        div.onclick = function(){
+            if(answers[currentQuestionIndex]){
+                score[q.key] -= answers[currentQuestionIndex].val;
+            }
+            answers[currentQuestionIndex] = opt;
+            score[q.key] += opt.val;
+            document.querySelectorAll(".option-item").forEach(function(i){i.classList.remove("active")});
+            div.classList.add("active");
+            setTimeout(function(){
+                nextQuestion();
+            },200);
+        };
+        optionBox.appendChild(div);
+    });
 }
+
+// 烟花特效
+const fwCanvas = document.getElementById("fireworksCanvas");
+const fwx = fwCanvas.getContext("2d");
+let fwRaf = null;
+let fwRockets = [];
+let fwParticles = [];
+let fwLaunchTimer = null;
+function fwResize(){
+    fwCanvas.width = window.innerWidth;
+    fwCanvas.height = window.innerHeight;
+}
+window.addEventListener("resize",fwResize);
+fwResize();
+function fwLaunch(){
+    const x = fwCanvas.width * (0.15 + Math.random()*0.7);
+    fwRockets.push({
+        x:x, y:fwCanvas.height,
+        vx:(Math.random()-0.5)*1.2,
+        vy:-(9 + Math.random()*3),
+        hue:Math.floor(Math.random()*360)
+    });
+}
+function fwBoom(r){
+    const count = 60 + Math.floor(Math.random()*40);
+    for(let i=0;i<count;i++){
+        const angle = (Math.PI*2*i)/count;
+        const speed = 1.5 + Math.random()*4.5;
+        fwParticles.push({
+            x:r.x, y:r.y,
+            vx:Math.cos(angle)*speed,
+            vy:Math.sin(angle)*speed,
+            alpha:1,
+            hue:r.hue + (Math.random()-0.5)*30,
+            decay:0.008 + Math.random()*0.012
+        });
+    }
+}
+function fwTick(){
+    fwx.globalCompositeOperation = "destination-out";
+    fwx.fillStyle = "rgba(0,0,0,0.18)";
+    fwx.fillRect(0,0,fwCanvas.width,fwCanvas.height);
+    fwx.globalCompositeOperation = "lighter";
+
+    // 火箭
+    for(let i=fwRockets.length-1;i>=0;i--){
+        const r = fwRockets[i];
+        r.x += r.vx;
+        r.y += r.vy;
+        r.vy += 0.12; // 重力
+        fwx.beginPath();
+        fwx.arc(r.x,r.y,2.5,0,Math.PI*2);
+        fwx.fillStyle = "hsl("+r.hue+",100%,70%)";
+        fwx.fill();
+        if(r.vy >= -2){
+            fwBoom(r);
+            fwRockets.splice(i,1);
+        }
+    }
+    // 爆炸粒子
+    for(let i=fwParticles.length-1;i>=0;i--){
+        const p = fwParticles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.04; // 重力
+        p.vx *= 0.99;
+        p.vy *= 0.99;
+        p.alpha -= p.decay;
+        if(p.alpha <= 0){ fwParticles.splice(i,1); continue; }
+        fwx.beginPath();
+        fwx.arc(p.x,p.y,2,0,Math.PI*2);
+        fwx.fillStyle = "hsla("+p.hue+",100%,65%,"+p.alpha+")";
+        fwx.fill();
+    }
+    fwRaf = requestAnimationFrame(fwTick);
+}
+function startFireworks(seconds){
+    stopFireworks();
+    fwRockets = [];
+    fwParticles = [];
+    fwTick();
+    let launched = 0;
+    const maxLaunch = Math.floor(seconds/0.25);
+    fwLaunchTimer = setInterval(function(){
+        fwLaunch();
+        if(Math.random()<0.5) fwLaunch();
+        launched++;
+        if(launched >= maxLaunch){
+            clearInterval(fwLaunchTimer);
+            setTimeout(stopFireworks, 2500);
+        }
+    },250);
+}
+function stopFireworks(){
+    if(fwLaunchTimer) clearInterval(fwLaunchTimer);
+    if(fwRaf) cancelAnimationFrame(fwRaf);
+    fwx.clearRect(0,0,fwCanvas.width,fwCanvas.height);
+    fwRaf = null;
+}
+
+function nextQuestion(){
+    if(currentQuestionIndex < questionList.length-1){
+        currentQuestionIndex++;
+        renderQuestion();
+    }else{
+        questionPage.classList.remove("active");
+        resultPage.classList.add("active");
+        showResult();
+        drawRadar();
+        startFireworks(3.5);
+    }
+}
+
+// 题目跳转面板
+const qPickerMask = document.getElementById("qPickerMask");
+const qPickerGrid = document.getElementById("qPickerGrid");
+document.getElementById("qPickerClose").onclick = function(){
+    qPickerMask.classList.remove("show");
+};
+progressNum.onclick = function(){
+    qPickerGrid.innerHTML = "";
+    for(let i=0;i<questionList.length;i++){
+        const cell = document.createElement("div");
+        cell.className = "q-cell";
+        if(answers[i]) cell.classList.add("done");
+        if(i === currentQuestionIndex) cell.classList.add("current");
+        cell.innerText = i+1;
+        cell.onclick = function(){
+            currentQuestionIndex = i;
+            qPickerMask.classList.remove("show");
+            renderQuestion();
+        };
+        qPickerGrid.appendChild(cell);
+    }
+    qPickerMask.classList.add("show");
+};
 
 function showResult(){
-    document.getElementById("quiz").style.display="none";
-    document.getElementById("result").style.display="block";
-    let type="";
-    type += score.E>score.I ? "E":"I";
-    type += score.S>score.N ? "S":"N";
-    type += score.T>score.F ? "T":"F";
-    type += score.J>score.P ? "J":"P";
-    document.getElementById("typeText").innerText = type;
-    const quoteText = quotes[type] || "独一无二的你";
-    document.getElementById("descText").innerText = quoteText;
-    const tipEl = document.getElementById("resultTip");
-    if(isJinYang){
-        tipEl.innerText = "✨金阳，可以选择送花花、发送悄悄话，或者给开发者100万现金，还能生成分享图保存";
-    }else{
-        tipEl.innerText = "✨你可以选择送花花、发送悄悄话，或者给开发者100万现金，还能生成分享图保存";
-    }
-    drawRadar();
-    startFireworks();
-}
-
-//雷达图 修复undefined，中文标签
-function drawRadar(){
-    if(radarChart) radarChart.destroy();
-    const ctxRadar = document.createElement('canvas');
-    const radarWrap = document.getElementById("radarBox");
-    radarWrap.innerHTML="";
-    radarWrap.appendChild(ctxRadar);
-    radarChart = new Chart(ctxRadar,{
-        type:"radar",
-        data:{
-            labels:["E外向","I内向","S实感","N直觉","T思考","F情感","J判断","P感知"],
-            datasets:[{data:[score.E,score.I,score.S,score.N,score.T,score.F,score.J,score.P],backgroundColor:"rgba(115,155,216,0.2)",borderColor:"#739bd8",pointBackgroundColor:"#739bd8"}]
-        },
-        options:{scales:{r:{min:0,max:16}},maintainAspectRatio:false}
-    })
-}
-
-//烟花
-const canvas=document.getElementById("fireCanvas");
-const ctx=canvas.getContext("2d");
-function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight}
-resize();
-window.addEventListener("resize",resize);
-let fireList=[];
-class Particle{
-    constructor(x,y,color){
-        this.x=x;this.y=y;this.sx=(Math.random()-0.5)*8;this.sy=(Math.random()-0.5)*8;this.alpha=1;this.color=color;this.size=Math.random()*3+1
-    }
-    update(){this.x+=this.sx;this.y+=this.sy;this.alpha-=0.018}
-    draw(){ctx.save();ctx.globalAlpha=this.alpha;ctx.fillStyle=this.color;ctx.beginPath();ctx.arc(this.x,this.y,this.size,0,Math.PI*2);ctx.fill();ctx.restore()}
-}
-function startFireworks(){
-    const colors=['#ff4466','#ffdd22','#44eeff','#77ff44','#ff77ee'];
-    for(let a=0;a<8;a++){
-        setTimeout(()=>{
-            const x = Math.random()*canvas.width;
-            const y = Math.random()*canvas.height*0.4;
-            for(let i=0;i<120;i++){
-                fireList.push(new Particle(x,y,colors[Math.floor(Math.random()*colors.length)]))
-            }
-        },a*300)
-    }
-}
-function animate(){
-    requestAnimationFrame(animate);
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    for(let i=fireList.length-1;i>=0;i--){
-        fireList[i].update();fireList[i].draw();
-        if(fireList[i].alpha<=0) fireList.splice(i,1);
-    }
-}
-animate();
-
-//送花花按钮
-document.getElementById("sendFlowerBtn").onclick = function(e){
-    const flowerEmoji = ["🌸","🌷","🌺","💐","🌹","🌻"];
-    for(let n=0;n<8;n++){
-        setTimeout(()=>{
-            const f = document.createElement("div");
-            f.className="flower";
-            f.innerText = flowerEmoji[Math.floor(Math.random()*flowerEmoji.length)];
-            f.style.left = (e.clientX + n*20)+"px";
-            f.style.top = e.clientY+"px";
-            document.body.appendChild(f);
-            setTimeout(()=>f.remove(),2200);
-        },n*80)
-    }
-}
-
-//悄悄话弹窗
-const msgModal = document.getElementById("msgModal");
-document.getElementById("msgBtn").onclick = ()=>msgModal.style.display="flex";
-function closeMsgModal(){msgModal.style.display="none"}
-function sendMsg(){
-    const txt = document.getElementById("msgInput").value.trim();
-    if(!txt) return alert("请输入悄悄话内容");
-    alert("发送成功 ✅\n开发者收不到这条消息，但是他感受到你的想法啦");
-    closeMsgModal();
-}
-
-//100万现金按钮
-document.getElementById("moneyBtn").onclick = function(){
-    if(isJinYang){
-        alert("支付成功\n哈哈金阳大气！这是虚拟特效，心意收到啦 🥳");
-    }else{
-        alert("支付成功\n哇，大手笔！这是虚拟特效，心意收到 ✨");
-    }
-}
-
-//分享卡片
-const shareModal = document.getElementById("shareModal");
-document.getElementById("shareBtn").onclick = function(){
-    shareModal.style.display="flex";
-    const type = document.getElementById("typeText").innerText;
-    const quoteText = quotes[type] || "独一无二的你";
-    document.getElementById("cardTitle").innerText = isJinYang ? "金阳的MBTI人格报告" : "MBTI人格报告";
+    let type = "";
+    type += score.E > 0 ? "E" : "I";
+    type += score.S > score.N ? "S" : "N";
+    type += score.T > score.F ? "T" : "F";
+    type += score.J > score.P ? "J" : "P";
+    const info = mbtiInfo[type];
+    document.getElementById("resultType").innerText = type;
+    document.getElementById("resultShortTag").innerText = "标签：" + info.short;
+    document.getElementById("resultDesc").innerText = info.detail;
     document.getElementById("cardType").innerText = type;
-    document.getElementById("cardQuote").innerText = quoteText;
-    if(cardChart) cardChart.destroy();
-    const cardRadarDom = document.getElementById("cardRadar");
-    cardRadarDom.innerHTML="";
-    const cardCtx = document.createElement("canvas");
-    cardRadarDom.appendChild(cardCtx);
-    cardChart = new Chart(cardCtx,{
+    document.getElementById("cardShort").innerText = info.short;
+    document.getElementById("cardDesc").innerText = info.detail;
+}
+
+function buildRadarConfig(dataArr){
+    return {
         type:"radar",
         data:{
             labels:["E外向","I内向","S实感","N直觉","T思考","F情感","J判断","P感知"],
-            datasets:[{data:[score.E,score.I,score.S,score.N,score.T,score.F,score.J,score.P],backgroundColor:"rgba(115,155,216,0.2)",borderColor:"#739bd8",pointBackgroundColor:"#739bd8"}]
+            datasets:[{
+                label:"",
+                data:dataArr,
+                borderColor:"#6284cb",
+                backgroundColor:"rgba(98,132,203,0.18)",
+                pointRadius:3,
+                pointHoverRadius:4,
+                borderWidth:2
+            }]
         },
-        options:{scales:{r:{min:0,max:16}},maintainAspectRatio:false}
-    })
+        options:{
+            maintainAspectRatio:false,
+            scales:{
+                r:{
+                    min:0,max:16,
+                    padding:10,
+                    beginAtZero:true,
+                    ticks:{
+                        display:false   // 关键：隐藏刻度数字，避免8轴数字互相重叠
+                    },
+                    pointLabels:{
+                        font:{size:15,weight:"500"},
+                        color:"#444"
+                    },
+                    grid:{color:"#dfe6f2"},
+                    angleLines:{color:"#dfe6f2"}
+                }
+            },
+            plugins:{
+                legend:{display:false}
+            }
+        }
+    };
 }
-function closeShareModal(){shareModal.style.display="none"}
-document.getElementById("saveCardBtn").onclick = function(){
-    const cardDom = document.getElementById("shareCard");
-    html2canvas(cardDom,{useCORS:true,scale:2}).then(canvas=>{
+
+function getDataArr(){
+    return [
+        Math.max(0,Math.min(16,8+score.E)),
+        Math.max(0,Math.min(16,8+score.I)),
+        Math.max(0,Math.min(16,8+score.S)),
+        Math.max(0,Math.min(16,8+score.N)),
+        Math.max(0,Math.min(16,8+score.T)),
+        Math.max(0,Math.min(16,8+score.F)),
+        Math.max(0,Math.min(16,8+score.J)),
+        Math.max(0,Math.min(16,8+score.P))
+    ];
+}
+
+function drawRadar(){
+    const ctx = document.getElementById("radarChart").getContext('2d');
+    if(radarChart) radarChart.destroy();
+    radarChart = new Chart(ctx, buildRadarConfig(getDataArr()));
+}
+
+const tipMask = document.getElementById("tipMask");
+const tipTitle = document.getElementById("tipTitle");
+const tipContent = document.getElementById("tipContent");
+document.getElementById("tipOk").onclick = function(){tipMask.classList.remove("show")};
+function showTip(title,content){
+    tipTitle.innerText = title;
+    tipContent.innerText = content;
+    tipMask.classList.add("show");
+}
+
+const confirmMask = document.getElementById("confirmMask");
+const confirmContent = document.getElementById("confirmContent");
+document.getElementById("confirmCancel").onclick = function(){confirmMask.classList.remove("show")};
+function showConfirm(content,onOk){
+    confirmContent.innerText = content;
+    confirmMask.classList.add("show");
+    document.getElementById("confirmOk").onclick = function(){
+        confirmMask.classList.remove("show");
+        onOk();
+    };
+}
+
+const inputMask = document.getElementById("inputMask");
+const modalNameInput = document.getElementById("modalNameInput");
+document.getElementById("inputCancel").onclick = function(){inputMask.classList.remove("show")};
+function showInput(defaultVal,onOk){
+    modalNameInput.value = defaultVal;
+    inputMask.classList.add("show");
+    document.getElementById("inputOk").onclick = function(){
+        const val = modalNameInput.value.trim();
+        if(val){
+            inputMask.classList.remove("show");
+            onOk(val);
+        }
+    };
+}
+
+const msgMask = document.getElementById("msgMask");
+const msgText = document.getElementById("msgText");
+document.getElementById("msgCancel").onclick = function(){msgMask.classList.remove("show")};
+document.getElementById("msgSend").onclick = function(){
+    const text = msgText.value.trim() || "作者辛苦啦～";
+    msgMask.classList.remove("show");
+    // 满屏弹幕
+    const layer = document.getElementById("danmuLayer");
+    layer.innerHTML = "";
+    for(let i=0;i<18;i++){
+        const d = document.createElement("div");
+        d.className = "danmu-item";
+        d.innerText = "💌 " + text;
+        d.style.top = (8 + Math.random()*80) + "vh";
+        const dur = 3 + Math.random()*3;
+        d.style.animationDuration = dur + "s";
+        d.style.animationDelay = (Math.random()*0.8) + "s";
+        d.style.opacity = 0.75 + Math.random()*0.25;
+        layer.appendChild(d);
+    }
+    showToast("💌 悄悄话已偷偷飘到作者耳边啦～");
+    setTimeout(function(){ layer.innerHTML = ""; },5500);
+};
+document.getElementById("msgBtn").onclick = function(){msgMask.classList.add("show")};
+
+// 通用俏皮 toast（跟送花花同款）
+function showToast(text){
+    const old = document.querySelector(".flower-toast");
+    if(old) old.remove();
+    const toast = document.createElement("div");
+    toast.className = "flower-toast";
+    toast.innerText = text;
+    document.body.appendChild(toast);
+    setTimeout(function(){ toast.remove(); },2600);
+}
+
+// 通用：满屏飘落 emoji 特效
+function showerEmoji(list, count){
+    const layer = document.getElementById("flowerLayer");
+    layer.innerHTML = "";
+    for(let i=0;i<count;i++){
+        const p = document.createElement("div");
+        p.className = "flower-petal";
+        p.innerText = list[Math.floor(Math.random()*list.length)];
+        p.style.left = Math.random()*100 + "vw";
+        p.style.fontSize = (22 + Math.random()*26) + "px";
+        const dur = 2.8 + Math.random()*2.6;
+        p.style.animationDuration = dur + "s";
+        p.style.animationDelay = (Math.random()*0.8) + "s";
+        layer.appendChild(p);
+    }
+    setTimeout(function(){ layer.innerHTML = ""; },6000);
+}
+
+// 送现金：NFC 百元钞支付动画 + 满屏钞票雨 + 感谢心意 toast
+document.getElementById("moneyBtn").onclick = function(){
+    const overlay = document.getElementById("nfcOverlay");
+    overlay.classList.add("show");
+    showerEmoji(["💴","💵","💸","💴","💵"],40);
+    setTimeout(function(){
+        overlay.classList.remove("show");
+        showToast("🙏 心意作者妥妥收到啦～谢谢你的宠爱！");
+    },2400);
+};
+
+// 送花花：满屏花瓣 + 俏皮提示
+document.getElementById("flowerBtn").onclick = function(){
+    showerEmoji(["🌸","🌺","💮","🌸","🌷","🌸","💮"],36);
+    showToast("🌸 花花已飘到作者怀里啦～作者心花怒放中！");
+};
+
+document.getElementById("restartBtn").onclick = function(){
+    showConfirm("确定要重新测试吗？当前答题进度会清空",function(){
+        resultPage.classList.remove("active");
+        welcomePage.classList.add("active");
+    });
+};
+
+const shareCardMask = document.getElementById("shareCardMask");
+const shareCard = document.getElementById("shareCard");
+document.getElementById("shareBtn").onclick = function(){
+    const ctx = document.getElementById("cardRadarChart").getContext('2d');
+    if(cardRadarChart) cardRadarChart.destroy();
+    cardRadarChart = new Chart(ctx, buildRadarConfig(getDataArr()));
+    setTimeout(function(){
+        shareCardMask.classList.add("show");
+    },100);
+};
+document.getElementById("closeCardBtn").onclick = function(){
+    shareCardMask.classList.remove("show");
+};
+document.getElementById("saveCardImgBtn").onclick = function(){
+    html2canvas(shareCard,{scale:2,backgroundColor:"#fff"}).then(function(canvas){
         const link = document.createElement("a");
-        link.download = isJinYang ? "金阳MBTI报告.png" : "MBTI报告.png";
+        link.download = userName + "_MBTI报告.png";
         link.href = canvas.toDataURL("image/png");
         link.click();
-    })
-}
+        showTip("保存成功","图片已下载！");
+    }).catch(function(){
+        showTip("失败","图片保存失败，请重试");
+    });
+};
 
-//重新测试按钮
-document.getElementById("restartBtn").onclick = function(){
-    score={E:0,I:0,S:0,N:0,T:0,F:0,J:0,P:0};
-    current=0;
-    document.getElementById("result").style.display="none";
-    document.getElementById("welcome").style.display="block";
-}
+cardUserName.onclick = function(){
+    showInput(userName,function(newName){
+        userName = newName;
+        userNameText.innerText = userName;
+        cardUserName.innerText = userName;
+    });
+};
 </script>
 </body>
 </html>
