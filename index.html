@@ -259,9 +259,13 @@
             transform:translateX(-50%);
             background:rgba(40,30,60,0.92);
             color:#fff;
-            padding:14px 22px;
+            padding:12px 20px;
             border-radius:999px;
-            font-size:15px;
+            font-size:13px;
+            white-space:nowrap;
+            max-width:92vw;
+            overflow:hidden;
+            text-overflow:ellipsis;
             z-index:1600;
             animation:toastPop .35s ease;
             box-shadow:0 6px 20px rgba(0,0,0,.25);
@@ -416,9 +420,9 @@
     <div id="questionPage" class="page question-page">
         <div class="card">
             <div class="progress-text" id="progressNum" title="点击跳转题目">1/48</div>
+            <div class="progress-hint">点这里跳转任意题目 👆</div>
             <h2 id="questionTitle"></h2>
             <div id="optionBox"></div>
-            <div class="progress-hint" style="text-align:center;margin-top:14px;">👆 点右上角进度数字可跳转任意题目</div>
         </div>
     </div>
 
@@ -962,7 +966,7 @@ document.getElementById("msgSend").onclick = function(){
         d.style.opacity = 0.75 + Math.random()*0.25;
         layer.appendChild(d);
     }
-    showToast("💌 悄悄话已偷偷飘到作者耳边啦～");
+    showToast("💌 作者虽然收不到，但心里已经想到啦～");
     setTimeout(function(){ layer.innerHTML = ""; },5500);
 };
 document.getElementById("msgBtn").onclick = function(){msgMask.classList.add("show")};
@@ -1003,14 +1007,14 @@ document.getElementById("moneyBtn").onclick = function(){
     showerEmoji(["💴","💵","💸","💴","💵"],40);
     setTimeout(function(){
         overlay.classList.remove("show");
-        showToast("🙏 心意作者妥妥收到啦～谢谢你的宠爱！");
+        showToast("🙏 心意作者妥妥收到啦～");
     },2400);
 };
 
 // 送花花：满屏花瓣 + 俏皮提示
 document.getElementById("flowerBtn").onclick = function(){
     showerEmoji(["🌸","🌺","💮","🌸","🌷","🌸","💮"],36);
-    showToast("🌸 花花已飘到作者怀里啦～作者心花怒放中！");
+    showToast("🌸 花花已飘到作者怀里啦～");
 };
 
 document.getElementById("restartBtn").onclick = function(){
