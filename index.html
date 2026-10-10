@@ -8,231 +8,404 @@
 *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui, -apple-system, sans-serif}
 body{background:#f6f9ff;color:#222;min-height:100vh;overflow-x:hidden}
 .container{max-width:720px;margin:0 auto;padding:24px}
+
+/* 欢迎首页 */
+.welcome-box{display:block;text-align:center;padding:40px 20px}
+.welcome-box h1{font-size:28px;color:#2c4b80;margin-bottom:16px}
+.welcome-box p{font-size:17px;color:#444;margin-bottom:32px;line-height:1.6}
+.welcome-btn-group{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.welcome-btn{padding:14px 24px;border-radius:10px;border:none;font-size:17px;cursor:pointer;transition:0.2s}
+.btn-yes{background:#739bd8;color:#fff}
+.btn-yes:hover{background:#5e88c7}
+.btn-no{background:#dde5f2;color:#222}
+.btn-no:hover{background:#c8d7ee}
+.welcome-tip{margin-top:24px;font-size:14px;color:#777}
+
+/* 答题页 */
+.quiz-box{display:none}
 .title{text-align:center;font-size:28px;margin-bottom:12px;color:#2c4b80}
 .progress-wrap{width:100%;height:8px;background:#dde5f2;border-radius:99px;margin-bottom:28px}
 .progress-bar{height:8px;background:#739bd8;border-radius:99px;transition:0.3s}
 .question{font-size:20px;margin:20px 0;line-height:1.5}
 .option{display:block;width:100%;padding:14px;margin:10px 0;border:1px solid #d6e1f0;background:#ffffff;color:#222;border-radius:10px;font-size:17px;cursor:pointer;transition:0.2s}
 .option:hover{background:#eef4fd;border-color:#9cb8e0}
+
+/* 结果页 */
 .result-box{display:none;padding:24px;border:1px solid #d6e1f0;border-radius:14px;margin-top:30px;background:#fff}
-.action-group{margin-top:24px;display:flex;gap:12px;flex-wrap:wrap}
-.action-btn{padding:12px 18px;border-radius:8px;border:none;font-size:16px;cursor:pointer;transition:0.2s}
+.action-group{margin-top:24px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.action-btn{padding:12px 14px;border-radius:8px;border:none;font-size:16px;cursor:pointer;transition:0.2s}
 .btn-flower{background:#d887a7;color:#fff}
 .btn-flower:hover{background:#c27090}
 .btn-msg{background:#739bd8;color:#fff}
 .btn-msg:hover{background:#5e88c7}
+.btn-money{background:#e6b849;color:#222}
+.btn-money:hover{background:#d1a338}
+.btn-share{background:#44b888;color:#fff}
+.btn-share:hover{background:#34a274}
 .tip-text-result{margin:16px 0;color:#666;font-size:15px}
+#radarBox{width:100%;height:360px;margin:20px 0}
 
-/* 烟花画布铺满全屏 */
+/* 烟花画布 */
 #fireCanvas{position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:99}
-/* 花朵漂浮元素 */
 .flower{position:fixed;font-size:36px;pointer-events:none;animation:flyUp 2.2s ease-out forwards;z-index:100}
 @keyframes flyUp{
 0{opacity:1;transform:translateY(0) scale(1)}
 100%{opacity:0;transform:translateY(-320px) scale(1.4)}
 }
+
 /* 悄悄话弹窗 */
 .modal{display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.7);z-index:101;align-items:center;justify-content:center;padding:20px}
 .modal-content{background:#fff;padding:24px;border-radius:12px;width:100%;max-width:480px}
 .modal textarea{width:100%;min-height:120px;margin:14px 0;padding:12px;border-radius:8px;background:#f6f9ff;color:#222;border:1px solid #d6e1f0;font-size:16px;resize:vertical}
-.modal-buttons{display:flex;gap:10px;justify-content:flex-end}
+.modal-btn-group{display:flex;gap:10px;justify-content:flex-end}
 .modal-btn{padding:10px 16px;border-radius:8px;border:none;cursor:pointer;font-size:15px}
 .send{background:#739bd8;color:white}
 .close{background:#b9c5d6;color:#222}
 .modal-tip{margin-top:10px;color:#666;font-size:14px}
-#radarBox{width:100%;height:360px;margin:20px 0}
+
+/* 分享卡片弹窗 */
+.shareModal{display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.75);z-index:102;align-items:center;justify-content:center;padding:16px}
+.shareCardWrap{background:#fff;padding:20px;border-radius:16px;max-width:420px;width:100%}
+#shareCard{background:linear-gradient(135deg,#e8f0fe,#dcebff);padding:28px 20px;border-radius:14px;text-align:center}
+#shareCard h2{color:#2c4b80;font-size:24px;margin-bottom:8px}
+#shareCard .sub-title{color:#4a6792;font-size:15px;margin-bottom:16px}
+#shareCard .type-text{font-size:42px;font-weight:bold;color:#2c4b80;margin:12px 0}
+#shareCard .quote{margin:16px 0;color:#333;font-size:16px}
+#shareCard .footer-note{margin-top:22px;color:#666;font-size:14px}
+#cardRadar{width:100%;height:240px}
+.shareBtnGroup{margin-top:16px;display:flex;gap:10px;justify-content:center}
+.saveCardBtn,.closeShareBtn{padding:11px 18px;border-radius:8px;border:none;cursor:pointer;font-size:16px}
+.saveCardBtn{background:#44b888;color:#fff}
+.closeShareBtn{background:#b9c5d6}
 </style>
 </head>
 <body>
 <div class="container">
-  <h1 class="title">金阳 MBTI 测试</h1>
-  <div class="progress-wrap">
-    <div class="progress-bar" id="progressBar" style="width:0%"></div>
-  </div>
-  <div class="question" id="qText"></div>
-  <div id="optWrap"></div>
-  <div class="result-box" id="result">
-    <h2>你的类型：<span id="typeText"></span></h2>
-    <div id="radarBox"></div>
-    <p id="descText" style="margin-top:12px;line-height:1.6"></p>
-    <p class="tip-text-result">✨点击【🌸送花花】送给开发者，【💬悄悄话】给开发者留言</p>
-    <div class="action-group">
-      <button class="action-btn btn-flower" id="sendFlowerBtn">🌸 送花花</button>
-      <button class="action-btn btn-msg" id="openMsgBtn">💬 悄悄话</button>
+    <!-- 欢迎首页 -->
+    <div class="welcome-box" id="welcome">
+        <h1>✨这份MBTI测试，专门给金阳同学定制的！</h1>
+        <p>欢迎来到专属人格小测试 🥳<br>请先告诉我：你是金阳本人吗？</p>
+        <div class="welcome-btn-group">
+            <button class="welcome-btn btn-yes" onclick="setIdentity(true)">✅ 我就是金阳</button>
+            <button class="welcome-btn btn-no" onclick="setIdentity(false)">🔘 我不是金阳</button>
+        </div>
+        <p class="welcome-tip">本次测试一共48道小题，几分钟就能完成</p>
     </div>
-  </div>
+
+    <!-- 答题区域 -->
+    <div class="quiz-box" id="quiz">
+        <h1 class="title" id="quizTitle">MBTI 测试</h1>
+        <div class="progress-wrap">
+            <div class="progress-bar" id="progressBar" style="width:0%"></div>
+        </div>
+        <div class="question" id="qText"></div>
+        <div id="optWrap"></div>
+    </div>
+
+    <!-- 结果页面 -->
+    <div class="result-box" id="result">
+        <h2>你的类型：<span id="typeText"></span></h2>
+        <div id="radarBox"></div>
+        <p id="descText" style="margin-top:12px;line-height:1.6"></p>
+        <p class="tip-text-result" id="resultTip"></p>
+        <div class="action-group">
+            <button class="action-btn btn-flower" id="sendFlowerBtn">🌸 送花花</button>
+            <button class="action-btn btn-msg" id="msgBtn">💬 发送悄悄话</button>
+            <button class="action-btn btn-money" id="moneyBtn">💰 给开发者100万现金</button>
+            <button class="action-btn btn-share" id="shareBtn">📸 生成分享图</button>
+        </div>
+    </div>
 </div>
 
 <!-- 悄悄话弹窗 -->
 <div class="modal" id="msgModal">
-  <div class="modal-content">
-    <h3>给开发者留言</h3>
-    <textarea id="msgInput" placeholder="写下你的悄悄话..."></textarea>
-    <p class="modal-tip">⚠ GitHub静态网页无后端，留言点击复制，手动发给开发者</p>
-    <div class="modal-buttons">
-      <button class="modal-btn close" id="closeModal">取消</button>
-      <button class="modal-btn send" id="submitMsg">复制留言</button>
+    <div class="modal-content">
+        <h3>给开发者留言</h3>
+        <textarea id="msgInput" placeholder="写下你的悄悄话..."></textarea>
+        <p class="modal-tip">⚠ 静态网页，点击发送会复制文字，手动发送</p>
+        <div class="modal-btn-group">
+            <button class="modal-btn close" onclick="closeMsgModal()">取消</button>
+            <button class="modal-btn send" onclick="copyMsg()">复制留言</button>
+        </div>
     </div>
-  </div>
+</div>
+
+<!-- 分享卡片弹窗 -->
+<div class="shareModal" id="shareModal">
+    <div class="shareCardWrap">
+        <div id="shareCard">
+            <h2 id="cardTitle">MBTI人格报告</h2>
+            <div class="sub-title">48题专属测试结果</div>
+            <div id="cardRadar"></div>
+            <div class="type-text" id="cardType">INFP</div>
+            <div class="quote" id="cardQuote"></div>
+            <div class="footer-note">分享给你的朋友</div>
+        </div>
+        <div class="shareBtnGroup">
+            <button class="saveCardBtn" id="saveCardBtn">💾 保存图片</button>
+            <button class="closeShareBtn" onclick="closeShareModal()">关闭</button>
+        </div>
+    </div>
 </div>
 
 <canvas id="fireCanvas"></canvas>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script>
-// 48题量表，五级选项
-const questions = [
-  {q:"聚会后，你通常？",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["E","I"]},
-  {q:"看待一件事，你更看重细节事实",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["S","N"]},
-  {q:"做决定优先逻辑公平",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["T","F"]},
-  {q:"生活习惯喜欢提前计划",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["J","P"]},
-];
+let isJinYang = false;
 let score={E:0,I:0,S:0,N:0,T:0,F:0,J:0,P:0};
 let current=0;
-const totalQ=questions.length;
-const qEl=document.getElementById('qText');
-const optWrap=document.getElementById('optWrap');
-const resultBox=document.getElementById('result');
-const typeText=document.getElementById('typeText');
-const descText=document.getElementById('descText');
-const progressBar=document.getElementById('progressBar');
+let totalQ=48;
 let radarChart=null;
+let cardChart=null;
+// 完整48题
+const questions = [
+    {q:"聚会之后，你需要独处来恢复精力",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["I","E"]},
+    {q:"你更关注事实细节，而不是想象可能性",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["S","N"]},
+    {q:"做决定时，你优先考虑逻辑公平",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["T","F"]},
+    {q:"你喜欢提前规划好日程，不喜欢临时变动",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["J","P"]},
+    {q:"认识新朋友会让你感到精力充沛",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["E","I"]},
+    {q:"你喜欢构思新想法，而不是重复做熟悉的事",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["N","S"]},
+    {q:"做选择时，你更看重人的感受和关系",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["F","T"]},
+    {q:"你习惯随性安排，留有余地不把计划定死",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["P","J"]},
+    {q:"你乐于在很多人的场合主动表达观点",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["E","I"]},
+    {q:"看说明时，你更在意实际操作步骤",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["S","N"]},
+    {q:"争论时，你更容易被道理说服，而非情绪",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["T","F"]},
+    {q:"任务最好有明确截止时间，不能无限拖延",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["J","P"]},
+    {q:"长时间独自做事会让你感到孤单",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["E","I"]},
+    {q:"你经常脑补事情背后隐藏的含义",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["N","S"]},
+    {q:"评价一件事，你首先考虑会不会伤害他人",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["F","T"]},
+    {q:"突发变动，不会让你觉得烦躁不安",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["P","J"]},
+    {q:"你倾向先开口交流，而不是默默观察",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["E","I"]},
+    {q:"你更相信亲身经历，不喜欢抽象理论",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["S","N"]},
+    {q:"你很难硬起心肠拒绝身边人的请求",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["F","T"]},
+    {q:"房间、文件尽量保持整齐有序",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["J","P"]},
+    {q:"安静环境里，你思路更清晰",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["I","E"]},
+    {q:"你对未来的想象多于对当下现实关注",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["N","S"]},
+    {q:"公平规则比人情优先",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["T","F"]},
+    {q:"更喜欢即兴安排，讨厌死板时间表",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["P","J"]},
+    {q:"遇到压力，你会找人倾诉释放情绪",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["E","I"]},
+    {q:"学习新知识，你优先看实例案例",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["S","N"]},
+    {q:"你做决定很容易共情对方处境",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["F","T"]},
+    {q:"事情没做完，心里会一直惦记放不下",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["J","P"]},
+    {q:"大量社交之后，你会觉得疲惫需要休息",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["I","E"]},
+    {q:"你喜欢寻找事物之间潜在联系",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["N","S"]},
+    {q:"对错标准是客观规则，不受情绪影响",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["T","F"]},
+    {q:"截止日前最后冲刺效率最高",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["P","J"]},
+    {q:"想到什么就直接说，不喜欢反复斟酌措辞",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["E","I"]},
+    {q:"你更擅长处理当下具体问题，不是长远设想",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["S","N"]},
+    {q:"团队里，你优先维护大家和谐氛围",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["F","T"]},
+    {q:"重要事项，你喜欢提前写计划清单",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["J","P"]},
+    {q:"你经常内心思考，较少主动表达想法",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["I","E"]},
+    {q:"你喜欢探索新可能性，不固守旧经验",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["N","S"]},
+    {q:"批评别人时，你优先讲客观事实",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["T","F"]},
+    {q:"计划被打乱，你能快速适应调整",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["P","J"]},
+    {q:"认识新朋友对你来说轻松自然",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["E","I"]},
+    {q:"描述事情，习惯讲真实细节，不夸张想象",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["S","N"]},
+    {q:"你害怕直言伤害到别人感情",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["F","T"]},
+    {q:"你倾向一次性把事情收尾，不喜欢悬着",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["J","P"]},
+    {q:"人多嘈杂环境会消耗你的精力",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["I","E"]},
+    {q:"你喜欢畅想未来，构思全新方案",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["N","S"]},
+    {q:"哪怕伤和气，道理也必须讲清楚",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["T","F"]},
+    {q:"保留多种选择，不喜欢早早定死结果",o:["非常符合","比较符合","一般","不太符合","完全不符合"],k:["P","J"]},
+];
+const quotes = {
+    "INFP":"理想藏于心，温柔有力量",
+    "INFJ":"洞察人心，安静而坚定",
+    "INTP":"热爱思考，永远好奇",
+    "INTJ":"远见规划，目标清晰",
+    "ISFP":"活在当下，感受生活",
+    "ISFJ":"细心守护，温暖可靠",
+    "ISTP":"冷静务实，擅长解决难题",
+    "ISTJ":"稳重守序，值得信赖",
+    "ENFP":"永远热烈，充满想象力",
+    "ENFJ":"温暖领袖，善于鼓舞他人",
+    "ENTP":"思辨有趣，脑洞不停",
+    "ENTJ":"果断自信，天生领导者",
+    "ESFP":"鲜活自在，享受当下",
+    "ESFJ":"热心体贴，照顾大家",
+    "ESTP":"灵活果敢，行动力强",
+    "ESTJ":"秩序分明，靠谱管理者"
+};
 
-// 渲染题目
+// 设置身份
+function setIdentity(jinyang){
+    isJinYang = jinyang;
+    document.getElementById("welcome").style.display="none";
+    document.getElementById("quiz").style.display="block";
+    document.getElementById("quizTitle").innerText = isJinYang ? "金阳 MBTI 测试" : "MBTI 测试";
+    render();
+}
+//渲染题目
 function render(){
-  const item=questions[current];
-  qEl.innerText=item.q;
-  optWrap.innerHTML="";
-  progressBar.style.width = (current / totalQ *100)+"%";
-  item.o.forEach((txt,i)=>{
-    const btn=document.createElement('button');
-    btn.className="option";
-    btn.innerText=txt;
-    btn.onclick=()=>{
-      const val = 4-i;
-      score[item.k[0]] += val;
-      score[item.k[1]] += (4-val);
-      current++;
-      if(current >= totalQ){showResult();}
-      else render();
-    }
-    optWrap.appendChild(btn);
-  })
+    const item=questions[current];
+    document.getElementById("qText").innerText = item.q;
+    const optWrap = document.getElementById("optWrap");
+    optWrap.innerHTML="";
+    document.getElementById("progressBar").style.width = (current/totalQ*100)+"%";
+    item.o.forEach((txt,i)=>{
+        const btn = document.createElement("button");
+        btn.className="option";
+        btn.innerText=txt;
+        btn.onclick=()=>{
+            const val = 4-i;
+            score[item.k[0]] += val;
+            score[item.k[1]] += (4-val);
+            current++;
+            if(current >= totalQ){
+                showResult();
+            }else{
+                render();
+            }
+        }
+        optWrap.appendChild(btn);
+    })
 }
 
-// 显示结果+启动烟花
 function showResult(){
-  qEl.style.display="none";optWrap.style.display="none";
-  resultBox.style.display="block";
-  progressBar.style.width="100%";
-  let type="";
-  type += score.E>score.I ? "E":"I";
-  type += score.S>score.N ? "S":"N";
-  type += score.T>score.F ? "T":"F";
-  type += score.J>score.P ? "J":"P";
-  typeText.innerText=type;
-  descText.innerText="这是你的MBTI类型描述，你可以在这里替换文案。";
-  drawRadar();
-  startFireworks(); // 答完自动放烟花
+    document.getElementById("quiz").style.display="none";
+    document.getElementById("result").style.display="block";
+    let type="";
+    type += score.E>score.I ? "E":"I";
+    type += score.S>score.N ? "S":"N";
+    type += score.T>score.F ? "T":"F";
+    type += score.J>score.P ? "J":"P";
+    document.getElementById("typeText").innerText = type;
+    const quoteText = quotes[type] || "独一无二的你";
+    document.getElementById("descText").innerText = quoteText;
+    const tipEl = document.getElementById("resultTip");
+    if(isJinYang){
+        tipEl.innerText = "✨金阳，可以选择送花花、发送悄悄话，或者给开发者100万现金，还能生成分享图保存";
+    }else{
+        tipEl.innerText = "✨你可以选择送花花、发送悄悄话，或者给开发者100万现金，还能生成分享图保存";
+    }
+    drawRadar();
+    startFireworks();
 }
 
 //雷达图
 function drawRadar(){
-  if(radarChart) radarChart.destroy();
-  const ctxRadar = document.createElement('canvas');
-  document.getElementById("radarBox").innerHTML="";
-  document.getElementById("radarBox").appendChild(ctxRadar);
-  radarChart = new Chart(ctxRadar,{
-    type:"radar",
-    data:{
-      labels:["E外向","I内向","S实感","N直觉","T思考","F情感","J判断","P感知"],
-      datasets:[{data:[score.E,score.I,score.S,score.N,score.T,score.F,score.J,score.P],backgroundColor:"rgba(115,155,216,0.2)",borderColor:"#739bd8",pointBackgroundColor:"#739bd8"}]
-    },
-    options:{scales:{r:{min:0,max:16}}}
-  })
+    if(radarChart) radarChart.destroy();
+    const ctxRadar = document.createElement('canvas');
+    document.getElementById("radarBox").innerHTML="";
+    document.getElementById("radarBox").appendChild(ctxRadar);
+    radarChart = new Chart(ctxRadar,{
+        type:"radar",
+        data:{
+            labels:["E外向","I内向","S实感","N直觉","T思考","F情感","J判断","P感知"],
+            datasets:[{data:[score.E,score.I,score.S,score.N,score.T,score.F,score.J,score.P],backgroundColor:"rgba(115,155,216,0.2)",borderColor:"#739bd8",pointBackgroundColor:"#739bd8"}]
+        },
+        options:{scales:{r:{min:0,max:16}},maintainAspectRatio:false}
+    })
 }
-render();
 
-// ========== 烟花特效代码 ==========
+//烟花
 const canvas=document.getElementById("fireCanvas");
 const ctx=canvas.getContext("2d");
 function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight}
 resize();
-window.addEventListener('resize',resize);
+window.addEventListener("resize",resize);
 let fireList=[];
 class Particle{
-  constructor(x,y,color){
-    this.x=x;this.y=y;this.sx=(Math.random()-0.5)*8;this.sy=(Math.random()-0.5)*8;
-    this.alpha=1;this.color=color;this.size=Math.random()*3+1;
-  }
-  update(){
-    this.x+=this.sx;this.y+=this.sy;this.alpha-=0.018;
-  }
-  draw(){
-    ctx.save();ctx.globalAlpha=this.alpha;
-    ctx.fillStyle=this.color;ctx.beginPath();
-    ctx.arc(this.x,this.y,this.size,0,Math.PI*2);ctx.fill();
-    ctx.restore();
-  }
+    constructor(x,y,color){
+        this.x=x;this.y=y;this.sx=(Math.random()-0.5)*8;this.sy=(Math.random()-0.5)*8;this.alpha=1;this.color=color;this.size=Math.random()*3+1
+    }
+    update(){this.x+=this.sx;this.y+=this.sy;this.alpha-=0.018}
+    draw(){ctx.save();ctx.globalAlpha=this.alpha;ctx.fillStyle=this.color;ctx.beginPath();ctx.arc(this.x,this.y,this.size,0,Math.PI*2);ctx.fill();ctx.restore()}
 }
 function startFireworks(){
-  const colors=['#ff4466','#ffdd22','#44eeff','#77ff44','#ff77ee'];
-  for(let a=0;a<8;a++){
-    setTimeout(()=>{
-      const x=Math.random()*canvas.width;
-      const y=Math.random()*canvas.height*0.4;
-      for(let i=0;i<120;i++){
-        fireList.push(new Particle(x,y,colors[Math.floor(Math.random()*colors.length)]))
-      }
-    },a*300)
-  }
+    const colors=['#ff4466','#ffdd22','#44eeff','#77ff44','#ff77ee'];
+    for(let a=0;a<8;a++){
+        setTimeout(()=>{
+            const x = Math.random()*canvas.width;
+            const y = Math.random()*canvas.height*0.4;
+            for(let i=0;i<120;i++){
+                fireList.push(new Particle(x,y,colors[Math.floor(Math.random()*colors.length)]))
+            }
+        },a*300)
+    }
 }
 function animate(){
-  requestAnimationFrame(animate);
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  for(let i=fireList.length-1;i>=0;i--){
-    fireList[i].update();fireList[i].draw();
-    if(fireList[i].alpha <=0) fireList.splice(i,1);
-  }
+    requestAnimationFrame(animate);
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    for(let i=fireList.length-1;i>=0;i--){
+        fireList[i].update();fireList[i].draw();
+        if(fireList[i].alpha<=0) fireList.splice(i,1);
+    }
 }
 animate();
 
-// ========== 送花花按钮 ==========
-const flowerEmoji = ["🌸","🌷","🌺","💐","🌹","🌻"];
-document.getElementById('sendFlowerBtn').onclick = function(e){
-  for(let n=0;n<6;n++){
-    setTimeout(()=>{
-      const f=document.createElement("div");
-      f.className="flower";
-      f.innerText=flowerEmoji[Math.floor(Math.random()*flowerEmoji.length)];
-      f.style.left = e.clientX + (n*30) +"px";
-      f.style.top = e.clientY +"px";
-      document.body.appendChild(f);
-      setTimeout(()=>f.remove(),2200);
-    },n*100)
-  }
+//送花花按钮
+document.getElementById("sendFlowerBtn").onclick = function(e){
+    const flowerEmoji = ["🌸","🌷","🌺","💐","🌹","🌻"];
+    for(let n=0;n<8;n++){
+        setTimeout(()=>{
+            const f = document.createElement("div");
+            f.className="flower";
+            f.innerText = flowerEmoji[Math.floor(Math.random()*flowerEmoji.length)];
+            f.style.left = (e.clientX + n*20)+"px";
+            f.style.top = e.clientY+"px";
+            document.body.appendChild(f);
+            setTimeout(()=>f.remove(),2200);
+        },n*80)
+    }
 }
 
-// ========== 悄悄话弹窗逻辑 ==========
-const modal = document.getElementById('msgModal');
-const openMsgBtn = document.getElementById('openMsgBtn');
-const closeModal = document.getElementById('closeModal');
-const submitMsg = document.getElementById('submitMsg');
-const msgInput = document.getElementById('msgInput');
-
-openMsgBtn.onclick = ()=> modal.style.display="flex";
-closeModal.onclick = ()=> modal.style.display="none";
-modal.onclick = (e)=>{
-  if(e.target === modal) modal.style.display="none";
+//悄悄话弹窗
+const msgModal = document.getElementById("msgModal");
+document.getElementById("msgBtn").onclick = ()=>msgModal.style.display="flex";
+function closeMsgModal(){msgModal.style.display="none"}
+function copyMsg(){
+    const txt = document.getElementById("msgInput").value.trim();
+    if(!txt) return alert("请输入留言内容");
+    navigator.clipboard.writeText(txt).then(()=>{
+        alert("✅悄悄话复制成功，可以发给开发者");
+        closeMsgModal();
+    })
 }
-submitMsg.onclick = ()=>{
-  const text = msgInput.value.trim();
-  if(!text) return;
-  navigator.clipboard.writeText(text).then(()=>{
-    alert("✅ 悄悄话复制成功！发给开发者即可");
-    modal.style.display="none";
-    msgInput.value="";
-  })
+
+//100万现金按钮
+document.getElementById("moneyBtn").onclick = function(){
+    if(isJinYang){
+        alert("哈哈金阳大气！不过是虚拟特效，心意收到啦 🥳");
+    }else{
+        alert("哇，大手笔！虚拟红包，心意收下 ✨");
+    }
+}
+
+//分享卡片
+const shareModal = document.getElementById("shareModal");
+document.getElementById("shareBtn").onclick = function(){
+    shareModal.style.display="flex";
+    const type = document.getElementById("typeText").innerText;
+    const quoteText = quotes[type] || "独一无二的你";
+    document.getElementById("cardTitle").innerText = isJinYang ? "金阳的MBTI人格报告" : "MBTI人格报告";
+    document.getElementById("cardType").innerText = type;
+    document.getElementById("cardQuote").innerText = quoteText;
+    if(cardChart) cardChart.destroy();
+    const cardRadarDom = document.getElementById("cardRadar");
+    cardRadarDom.innerHTML="";
+    const cardCtx = document.createElement("canvas");
+    cardRadarDom.appendChild(cardCtx);
+    cardChart = new Chart(cardCtx,{
+        type:"radar",
+        data:{
+            labels:["E","I","S","N","T","F","J","P"],
+            datasets:[{data:[score.E,score.I,score.S,score.N,score.T,score.F,score.J,score.P],backgroundColor:"rgba(115,155,216,0.2)",borderColor:"#739bd8",pointBackgroundColor:"#739bd8"}]
+        },
+        options:{scales:{r:{min:0,max:16}},maintainAspectRatio:false}
+    })
+}
+function closeShareModal(){shareModal.style.display="none"}
+document.getElementById("saveCardBtn").onclick = function(){
+    const cardDom = document.getElementById("shareCard");
+    html2canvas(cardDom,{useCORS:true,scale:2}).then(canvas=>{
+        const link = document.createElement("a");
+        link.download = isJinYang ? "金阳MBTI报告.png" : "MBTI报告.png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+    })
 }
 </script>
 </body>
